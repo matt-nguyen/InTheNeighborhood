@@ -40,7 +40,7 @@ public class MainActivity extends GoogleApiConnectActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
 
-
+        // TODO: Add location proximity alerts
         // TODO: Add mapfragment under recyclerview to show currrent location and all task locations
     }
 
