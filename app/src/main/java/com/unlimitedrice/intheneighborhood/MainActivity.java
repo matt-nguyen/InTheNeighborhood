@@ -18,6 +18,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends GoogleApiConnectActivity {
 
+    private static final String TAG = "MainActivity";
+
     private TaskAdapter mAdapter;
     private ArrayList<Task> mTasks;
 
@@ -40,8 +42,7 @@ public class MainActivity extends GoogleApiConnectActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
 
-        // TODO: Add location proximity alerts
-        // TODO: Add mapfragment under recyclerview to show currrent location and all task locations
+        // TODO:[LOW] Add mapfragment under recyclerview to show currrent location and all task locations
     }
 
     @Override
@@ -63,7 +64,7 @@ public class MainActivity extends GoogleApiConnectActivity {
 
                 Intent intent = new Intent(this, TaskActivity.class);
 //                intent.putExtra(TaskActivity.EXTRA_TASK_POS, taskManager.getTasks().size()-1);
-                Log.d("MainActivityLog", "Starting new task with id = " + task.getId());
+                Log.d(TAG, "Starting new task with id = " + task.getId());
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID, task.getId());
 
                 startActivityForResult(intent, 0);
@@ -82,7 +83,6 @@ public class MainActivity extends GoogleApiConnectActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("onActivityResult", "Here");
         mAdapter.notifyDataSetChanged();
 
         TaskManager.get(this).saveTasks();
@@ -93,7 +93,7 @@ public class MainActivity extends GoogleApiConnectActivity {
         if(grantResults.length > 0){
 
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Log.d("onRequestPermissionsRe", "ACCESS_FINE_LOCATION access granted");
+                Log.d(TAG, "ACCESS_FINE_LOCATION access granted");
             }
         }
     }
