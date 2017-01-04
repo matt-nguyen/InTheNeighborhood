@@ -64,7 +64,6 @@ public class TaskManager {
 
     public void deleteTask(Task t){
         if(mTasks != null) mTasks.remove(t);
-
     }
 
     public void clearTasks(){
@@ -73,5 +72,30 @@ public class TaskManager {
 
     public void saveTasks(){
         mTaskJsonSerializer.saveTasks(mTasks);
+    }
+
+    /*************************************************************
+     * Returns true if the alertId is not currently set to a task
+     *************************************************************/
+    public boolean isAlertIdAvailable(int alertId){
+        for(Task task: mTasks){
+            if(task.getAlertId() == alertId) return false;
+        }
+        return true;
+    }
+
+    /******************************************
+     * Randomly generates an available int id
+     ******************************************/
+    public int generateAlertId(){
+        int MAX_VALUE = Integer.MAX_VALUE;
+
+        int alertId;
+
+        do{
+            alertId = (int)(Math.random() * MAX_VALUE);
+        }while(!isAlertIdAvailable(alertId));
+
+        return alertId;
     }
 }

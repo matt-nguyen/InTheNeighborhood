@@ -17,6 +17,9 @@ public class Task {
     private String locName;
     private String locAddress;
     private LatLng locLatLng;
+    private int alertId;
+
+    // TODO: Add boolean variable to mark if a task is complete
 
     public Task(){
         this(null, null);
@@ -90,5 +93,13 @@ public class Task {
 
     public void setLocLatLng(LatLng locLatLng) {
         this.locLatLng = locLatLng;
+    }
+
+    public int getAlertId() {
+        return alertId;
+    }
+
+    public void setAlertId(int alertId) {
+        this.alertId = alertId;
     }
 }

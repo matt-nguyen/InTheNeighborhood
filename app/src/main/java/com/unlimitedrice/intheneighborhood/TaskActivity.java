@@ -2,6 +2,8 @@ package com.unlimitedrice.intheneighborhood;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -30,12 +32,17 @@ import java.util.UUID;
 
 public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback {
 
-    private static final float PROXIMITY_ALERT_RADIUS = 1609;
+    private static final String TAG = "TaskActivity";
 
     public static final String EXTRA_TASK_ID =
             "com.unlimitedrice.intheneighborhood.task_id";
     public static final String EXTRA_TASK_POS =
             "com.unlimitedrice.intheneighborhood.task_pos";
+
+    private static final float PROXIMITY_ALERT_RADIUS = 1609;
+    private static final String PROXIMITY_ALERT_INTENT =
+            "com.unlimitedrice.intheneighborhood.PROXIMITY_ALERT";
+
 
     private GoogleMap mMap;
     private EditText mDescEditText;
@@ -49,13 +56,11 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
 
-        Log.d("TaskActivity", "onCreate");
-        Log.d("TaskActivity", "new log");
 //        int position = getIntent().getIntExtra(EXTRA_TASK_POS, 0);
 //        mTask = TaskManager.get(this).getTask(position);
 
         UUID taskId = (UUID)getIntent().getSerializableExtra(EXTRA_TASK_ID);
-        Log.d("TaskActivity", "taskId - " + taskId.toString());
+        Log.d(TAG, "taskId - " + taskId.toString());
         mTask = TaskManager.get(this).getTask(taskId);
 
         mDescEditText = (EditText)findViewById(R.id.descriptionEditText);
@@ -102,6 +107,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             mSelectPlaceButton.setText(mTask.getLocName());
         }
 
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -109,7 +115,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         mapFragment.getMapAsync(this);
 
 
-        // TODO: Add grocery list to task obj and activity
+        // TODO: [LOW] Add grocery list to task obj and activity
     }
 
 
@@ -119,7 +125,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.d("onMapReady", "on map ready");
+        Log.d(TAG, "on map ready");
         mMap = googleMap;
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -132,14 +138,14 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         if(latLng != null){
             mMap.addMarker(new MarkerOptions().position(latLng).title(mTask.getLocName()));
 
-            // TODO: Possibly modify zoom to show both the task location and the current location?
+            // TODO: [LOW]Possibly modify zoom to show both the task location and the current location?
         }else{
 
             Location currentLocation = GoogleServiceManager.get(this).getLastLocation();
             if(currentLocation != null) {
                 latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             }else{
-                Log.d("onMapReady", "did not get location");
+                Log.d(TAG, "did not get location");
             }
         }
 
@@ -150,57 +156,94 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("onActivityResult", "done picking");
 
         if(resultCode == Activity.RESULT_OK){
+            Log.d(TAG, "RESULT_OK");
+
             Place place = PlacePicker.getPlace(this, data);
 
+            PendingIntent pi = buildAlertPendingIntent();
+
+            // Update the task and map with the new place
             if(place != null) {
-
-                // Update the task and map with the new place
-                String placeName = place.getName().toString();
-                LatLng latLng = place.getLatLng();
-
-                mSelectPlaceButton.setText(placeName);
-
-                mTask.setLocName(placeName);
-                mTask.setLocLatLng(latLng);
-
+                updatePlace(place);
+                toggleProximityAlert(pi, place.getLatLng());
+            }else{
                 mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(latLng).title(placeName));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+                toggleProximityAlert(pi, null);
+            }
 
+        }else{
+            Log.d(TAG, "not RESULT_OK");
 
-                // Add/update the proximity alert
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED) {
+        }
+    }
 
-//                    if(mLocationManager == null) {
-//                        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-//                    }
-//
-//
-//                    Intent intent = new Intent(this, TaskActivity.class);
-//                    intent.setAction("com.unlimitedrice.intheneighborhood.PROXIMITY_ALERT");
-//                    intent.putExtra(EXTRA_TASK_ID, mTask.getId());
-//
-//                    PendingIntent pi = PendingIntent.getBroadcast(this,
-//                            Integer.parseInt(mTask.getId().toString()), // Id to add/remove in locationmanager
-//                            intent,
-//                            0);
-//
-//                    mLocationManager.removeProximityAlert(pi);
-//
-//                    Log.d("onActivityResult", "Adding proximity alert");
-//                    mLocationManager.addProximityAlert(latLng.latitude, latLng.longitude,
-//                            PROXIMITY_ALERT_RADIUS,
-//                            -1,
-//                            pi);
+    /*****************************************************
+     * Updates the place information on the Task and Map
+     *
+     *****************************************************/
+    private void updatePlace(Place place){
+        mMap.clear();
 
-                }
+        if(place != null) {
+            String placeName = place.getName().toString();
+            LatLng latLng = place.getLatLng();
+            mSelectPlaceButton.setText(placeName);
+
+            mTask.setLocName(placeName);
+            mTask.setLocLatLng(latLng);
+
+            mMap.addMarker(new MarkerOptions().position(latLng).title(placeName));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+        }else{
+            mSelectPlaceButton.setText(getString(R.string.content_select_place));
+
+            mTask.setLocName(null);
+            mTask.setLocLatLng(null);
+        }
+
+    }
+
+    /*******************************************************
+     * Builds the pending intent to use for proximity alerts
+     *******************************************************/
+    private PendingIntent buildAlertPendingIntent(){
+
+        int alertId = mTask.getAlertId(); // Alert id to mark the prox alert to the task
+        if(alertId == -1){
+            alertId = TaskManager.get(this).generateAlertId();
+            mTask.setAlertId(alertId);
+        }
+
+        Intent intent = new Intent(this, TaskActivity.class);
+        intent.setAction(PROXIMITY_ALERT_INTENT);
+        intent.putExtra(AlertReceiver.EXTRA_TASK_ID, mTask.getId());
+
+        return PendingIntent.getBroadcast(this, alertId, intent, 0);
+
+    }
+
+    private void toggleProximityAlert(PendingIntent pi, LatLng latLng){
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (latLng != null) {
+                Log.d(TAG, "Adding/Updating proximity alert");
+                mLocationManager.addProximityAlert(latLng.latitude,
+                        latLng.longitude,
+                        PROXIMITY_ALERT_RADIUS,
+                        -1,
+                        pi);
+
+            } else {
+                Log.d(TAG, "Removing proximity alert");
+                mLocationManager.removeProximityAlert(pi);
+                pi.cancel();
             }
         }
+        // TODO: Add logic to toggle based on if the task is complete or not
     }
 
 }
