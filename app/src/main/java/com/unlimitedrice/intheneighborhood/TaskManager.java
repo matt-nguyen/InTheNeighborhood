@@ -26,11 +26,9 @@ public class TaskManager {
     }
 
     public static TaskManager get(Context c){
-
         if(sTaskManager == null){
             sTaskManager = new TaskManager(c.getApplicationContext());
         }
-
         return sTaskManager;
     }
 
@@ -63,39 +61,44 @@ public class TaskManager {
     }
 
     public void deleteTask(Task t){
+        // TODO: If we delete a task, need to remove the proximity alert
         if(mTasks != null) mTasks.remove(t);
     }
 
+    /******************************************************
+     * Clears all tasks and their proximity alerts, if any
+     ******************************************************/
     public void clearTasks(){
-        if(mTasks != null) mTasks.clear();
+        if(mTasks != null) {
+            AlertReceiver.clearAlerts(mContext, mTasks);
+            mTasks.clear();
+        }
     }
 
     public void saveTasks(){
         mTaskJsonSerializer.saveTasks(mTasks);
     }
 
-    /*************************************************************
-     * Returns true if the alertId is not currently set to a task
-     *************************************************************/
-    public boolean isAlertIdAvailable(int alertId){
-        for(Task task: mTasks){
-            if(task.getAlertId() == alertId) return false;
-        }
-        return true;
-    }
-
     /******************************************
      * Randomly generates an available int id
      ******************************************/
     public int generateAlertId(){
-        int MAX_VALUE = Integer.MAX_VALUE;
-
         int alertId;
 
         do{
-            alertId = (int)(Math.random() * MAX_VALUE);
+            alertId = (int)(Math.random() * Integer.MAX_VALUE);
         }while(!isAlertIdAvailable(alertId));
 
         return alertId;
+    }
+
+    /*************************************************************
+     * Returns true if the alertId is not currently set to a task
+     *************************************************************/
+    private boolean isAlertIdAvailable(int alertId){
+        for(Task task: mTasks){
+            if(task.getAlertId() == alertId) return false;
+        }
+        return true;
     }
 }

@@ -1,6 +1,5 @@
 package com.unlimitedrice.intheneighborhood;
 
-import android.*;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends GoogleApiConnectActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = MainActivity.class.getName();
 
     private TaskAdapter mAdapter;
     private ArrayList<Task> mTasks;
@@ -41,6 +40,10 @@ public class MainActivity extends GoogleApiConnectActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
+
+        // TODO: Test the proximity alerts IRL
+        // TODO: How line item should look when it is a complete task
+
 
         // TODO:[LOW] Add mapfragment under recyclerview to show currrent location and all task locations
     }

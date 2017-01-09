@@ -80,6 +80,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
         holder.descriptionTextView.setText(task.getDescription());
         holder.locNameTextView.setText(task.getLocName());
 
+        // TODO: [DESIGN] Distinguish when a task is done
+
         // Clicking on the task viewholder will open the TaskActivity
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

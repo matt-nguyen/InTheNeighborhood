@@ -15,20 +15,21 @@ public class Task {
     private UUID id;
     private String description;
     private String locName;
-    private String locAddress;
     private LatLng locLatLng;
     private int alertId;
-
-    // TODO: Add boolean variable to mark if a task is complete
+    private boolean isDone;
 
     public Task(){
         this(null, null);
     }
 
     public Task(String description, String locName){
-        id = UUID.randomUUID();
         this.description = description;
         this.locName = locName;
+
+        id = UUID.randomUUID();
+        isDone = false;
+        alertId = -1;
     }
 
     public Task(JSONObject json) throws JSONException{
@@ -79,14 +80,6 @@ public class Task {
         this.locName = locName;
     }
 
-    public String getLocAddress() {
-        return locAddress;
-    }
-
-    public void setLocAddress(String locAddress) {
-        this.locAddress = locAddress;
-    }
-
     public LatLng getLocLatLng() {
         return locLatLng;
     }
@@ -101,5 +94,13 @@ public class Task {
 
     public void setAlertId(int alertId) {
         this.alertId = alertId;
+    }
+
+    public boolean isDone() {
+        return isDone;
+    }
+
+    public void setDone(boolean done) {
+        isDone = done;
     }
 }

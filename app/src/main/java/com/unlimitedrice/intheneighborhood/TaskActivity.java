@@ -15,6 +15,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -32,21 +34,15 @@ import java.util.UUID;
 
 public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback {
 
-    private static final String TAG = "TaskActivity";
+    private static final String TAG = TaskActivity.class.getName();
 
     public static final String EXTRA_TASK_ID =
             "com.unlimitedrice.intheneighborhood.task_id";
-    public static final String EXTRA_TASK_POS =
-            "com.unlimitedrice.intheneighborhood.task_pos";
-
-    private static final float PROXIMITY_ALERT_RADIUS = 1609;
-    private static final String PROXIMITY_ALERT_INTENT =
-            "com.unlimitedrice.intheneighborhood.PROXIMITY_ALERT";
-
 
     private GoogleMap mMap;
     private EditText mDescEditText;
     private Button mSelectPlaceButton;
+    private CheckBox mIsDoneCheckbox;
     private Task mTask;
 
     private LocationManager mLocationManager;
@@ -107,6 +103,18 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             mSelectPlaceButton.setText(mTask.getLocName());
         }
 
+        mIsDoneCheckbox = (CheckBox)findViewById(R.id.isDoneCheckBox);
+        mIsDoneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                // Update task and proximity alert
+                mTask.setDone(b);
+                AlertReceiver.toggleProximityAlert(TaskActivity.this, mTask);
+            }
+        });
+
+        mIsDoneCheckbox.setChecked(mTask.isDone());
+
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -116,6 +124,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
 
         // TODO: [LOW] Add grocery list to task obj and activity
+        // TODO: [LOW] Add proximity radius selection to task and activity
     }
 
 
@@ -162,20 +171,18 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
             Place place = PlacePicker.getPlace(this, data);
 
-            PendingIntent pi = buildAlertPendingIntent();
 
             // Update the task and map with the new place
             if(place != null) {
                 updatePlace(place);
-                toggleProximityAlert(pi, place.getLatLng());
             }else{
                 mMap.clear();
-                toggleProximityAlert(pi, null);
             }
+
+            AlertReceiver.toggleProximityAlert(this, mTask);
 
         }else{
             Log.d(TAG, "not RESULT_OK");
-
         }
     }
 
@@ -204,46 +211,6 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             mTask.setLocLatLng(null);
         }
 
-    }
-
-    /*******************************************************
-     * Builds the pending intent to use for proximity alerts
-     *******************************************************/
-    private PendingIntent buildAlertPendingIntent(){
-
-        int alertId = mTask.getAlertId(); // Alert id to mark the prox alert to the task
-        if(alertId == -1){
-            alertId = TaskManager.get(this).generateAlertId();
-            mTask.setAlertId(alertId);
-        }
-
-        Intent intent = new Intent(this, TaskActivity.class);
-        intent.setAction(PROXIMITY_ALERT_INTENT);
-        intent.putExtra(AlertReceiver.EXTRA_TASK_ID, mTask.getId());
-
-        return PendingIntent.getBroadcast(this, alertId, intent, 0);
-
-    }
-
-    private void toggleProximityAlert(PendingIntent pi, LatLng latLng){
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            if (latLng != null) {
-                Log.d(TAG, "Adding/Updating proximity alert");
-                mLocationManager.addProximityAlert(latLng.latitude,
-                        latLng.longitude,
-                        PROXIMITY_ALERT_RADIUS,
-                        -1,
-                        pi);
-
-            } else {
-                Log.d(TAG, "Removing proximity alert");
-                mLocationManager.removeProximityAlert(pi);
-                pi.cancel();
-            }
-        }
-        // TODO: Add logic to toggle based on if the task is complete or not
     }
 
 }
