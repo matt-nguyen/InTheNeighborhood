@@ -83,6 +83,11 @@ public class MainActivity extends GoogleApiConnectActivity {
 
     }
 
+    @Override
+    public void onPause(){
+        super.onPause();
+        TaskManager.get(this).saveTasks();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

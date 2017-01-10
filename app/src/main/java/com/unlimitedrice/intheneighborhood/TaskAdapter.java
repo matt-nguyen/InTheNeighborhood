@@ -80,7 +80,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
         holder.descriptionTextView.setText(task.getDescription());
         holder.locNameTextView.setText(task.getLocName());
 
-        // TODO: [DESIGN] Distinguish when a task is done
+        if(task.isDone()) {
+            // TODO: Make background highlight gray for tasks done
+        }else if(task.isNearby()) {
+            // TODO: Make background highlight green for tasks nearby
+        }
 
         // Clicking on the task viewholder will open the TaskActivity
         holder.itemView.setOnClickListener(new View.OnClickListener() {

@@ -36,13 +36,6 @@ public class TaskManager {
         return mTasks;
     }
 
-    public Task getTask(int pos){
-        if(pos > -1 && pos < mTasks.size()){
-            return mTasks.get(pos);
-        }
-        return null;
-    }
-
     public Task getTask(UUID id){
         if(id != null){
             for(Task t: mTasks){
@@ -61,7 +54,6 @@ public class TaskManager {
     }
 
     public void deleteTask(Task t){
-        // TODO: If we delete a task, need to remove the proximity alert
         if(mTasks != null) mTasks.remove(t);
     }
 
@@ -70,7 +62,6 @@ public class TaskManager {
      ******************************************************/
     public void clearTasks(){
         if(mTasks != null) {
-            AlertReceiver.clearAlerts(mContext, mTasks);
             mTasks.clear();
         }
     }
@@ -79,26 +70,5 @@ public class TaskManager {
         mTaskJsonSerializer.saveTasks(mTasks);
     }
 
-    /******************************************
-     * Randomly generates an available int id
-     ******************************************/
-    public int generateAlertId(){
-        int alertId;
 
-        do{
-            alertId = (int)(Math.random() * Integer.MAX_VALUE);
-        }while(!isAlertIdAvailable(alertId));
-
-        return alertId;
-    }
-
-    /*************************************************************
-     * Returns true if the alertId is not currently set to a task
-     *************************************************************/
-    private boolean isAlertIdAvailable(int alertId){
-        for(Task task: mTasks){
-            if(task.getAlertId() == alertId) return false;
-        }
-        return true;
-    }
 }

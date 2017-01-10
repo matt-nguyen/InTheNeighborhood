@@ -18,6 +18,7 @@ public class Task {
     private LatLng locLatLng;
     private int alertId;
     private boolean isDone;
+    private boolean isNearby;
 
     public Task(){
         this(null, null);
@@ -102,5 +103,13 @@ public class Task {
 
     public void setDone(boolean done) {
         isDone = done;
+    }
+
+    public boolean isNearby() {
+        return isNearby;
+    }
+
+    public void setNearby(boolean nearby) {
+        isNearby = nearby;
     }
 }

@@ -109,7 +109,6 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 // Update task and proximity alert
                 mTask.setDone(b);
-                AlertReceiver.toggleProximityAlert(TaskActivity.this, mTask);
             }
         });
 
@@ -178,8 +177,6 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             }else{
                 mMap.clear();
             }
-
-            AlertReceiver.toggleProximityAlert(this, mTask);
 
         }else{
             Log.d(TAG, "not RESULT_OK");
