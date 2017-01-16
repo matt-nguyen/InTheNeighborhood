@@ -32,6 +32,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.UUID;
 
+/******************************************************************
+ * Activity that displays the Task for viewing/editing purposes
+ *
+ ******************************************************************/
+
 public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback {
 
     private static final String TAG = TaskActivity.class.getName();
@@ -45,15 +50,11 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     private CheckBox mIsDoneCheckbox;
     private Task mTask;
 
-    private LocationManager mLocationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
-
-//        int position = getIntent().getIntExtra(EXTRA_TASK_POS, 0);
-//        mTask = TaskManager.get(this).getTask(position);
 
         UUID taskId = (UUID)getIntent().getSerializableExtra(EXTRA_TASK_ID);
         Log.d(TAG, "taskId - " + taskId.toString());
@@ -107,14 +108,11 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         mIsDoneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                // Update task and proximity alert
                 mTask.setDone(b);
             }
         });
 
         mIsDoneCheckbox.setChecked(mTask.isDone());
-
-        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -123,7 +121,6 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
 
         // TODO: [LOW] Add grocery list to task obj and activity
-        // TODO: [LOW] Add proximity radius selection to task and activity
     }
 
 
@@ -149,7 +146,8 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             // TODO: [LOW]Possibly modify zoom to show both the task location and the current location?
         }else{
 
-            Location currentLocation = GoogleServiceManager.get(this).getLastLocation();
+//            Location currentLocation = GoogleServiceManager.get(this).getLastLocation();
+            Location currentLocation = LocationUpdateService.getLastUserLocation();
             if(currentLocation != null) {
                 latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             }else{
@@ -157,9 +155,22 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             }
         }
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+        if(latLng != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+        }
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Remove task from TaskManager if the task description is empty
+        if(mTask.getDescription() == null){
+            Log.d(TAG, "Removing empty task");
+            TaskManager.get(this).deleteTask(mTask);
+        }
     }
 
     @Override
@@ -169,7 +180,6 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             Log.d(TAG, "RESULT_OK");
 
             Place place = PlacePicker.getPlace(this, data);
-
 
             // Update the task and map with the new place
             if(place != null) {

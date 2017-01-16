@@ -3,20 +3,24 @@ package com.unlimitedrice.intheneighborhood;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
 
-/**
- * Created by unlim on 12/8/2016.
- */
+/*********************************************************************
+ * Adapter for the recycler view that will display the list of Tasks
+ *
+ *********************************************************************/
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> implements
         View.OnCreateContextMenuListener{
@@ -74,16 +78,27 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
     public void onBindViewHolder(final ViewHolder holder, final int position) {
 
         Task task = mTasks.get(position);
-        Log.d("onBindViewHolder", "Position - " + position + " : " + task.getDescription()
-                + " - " + task.getLocName());
+//        Log.d("onBindViewHolder", "Position - " + position + " : " + task.getDescription()
+//                + " - " + task.getLocName());
 
         holder.descriptionTextView.setText(task.getDescription());
         holder.locNameTextView.setText(task.getLocName());
 
+        // Highlight line item if task is done or nearby
+        int colorId = -1;
         if(task.isDone()) {
             // TODO: Make background highlight gray for tasks done
+            colorId = R.color.colorGrayHighlight;
         }else if(task.isNearby()) {
             // TODO: Make background highlight green for tasks nearby
+            colorId = R.color.colorGreenHighlight;
+        }else{
+            colorId = R.color.colorWhite;
+        }
+
+        if(colorId != -1){
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(),
+                    colorId));
         }
 
         // Clicking on the task viewholder will open the TaskActivity
@@ -91,7 +106,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, TaskActivity.class);
-//                intent.putExtra(TaskActivity.EXTRA_TASK_POS, position);
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID, mTasks.get(position).getId());
 
                 ((Activity)mContext).startActivityForResult(intent, 0);
@@ -110,7 +124,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
         });
 
         holder.itemView.setOnCreateContextMenuListener(this);
-//        ((Activity)mContext).registerForContextMenu(holder.itemView);
     }
 
     @Override

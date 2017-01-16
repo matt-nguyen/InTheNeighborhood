@@ -1,7 +1,10 @@
 package com.unlimitedrice.intheneighborhood;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,12 +18,36 @@ import android.view.MenuItem;
 
 import java.util.ArrayList;
 
-public class MainActivity extends GoogleApiConnectActivity {
+/************************************************************************
+ * Front activity of app that displays list of all the user's tasks
+ * From here, the user can:
+ * - Initiate a new task
+ * - Select an existing task for editing
+ * - Clearing all tasks
+ *
+ ************************************************************************/
 
-    private static final String TAG = MainActivity.class.getName();
+public class TaskListActivity extends GoogleApiConnectActivity {
+
+    private static final String TAG = TaskListActivity.class.getName();
+
+    public static final String INTENT_FILTER_NOTIFY =
+            "com.unlimitedrice.intheneighborhood.notify_adapter";
 
     private TaskAdapter mAdapter;
     private ArrayList<Task> mTasks;
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(mAdapter != null) {
+
+                // As user leaves and enters task locations, "refresh" the task list to display
+                // task proximity by color
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,17 +62,40 @@ public class MainActivity extends GoogleApiConnectActivity {
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // TODO: Add check for google play services
+
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED){
+
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
 
-        // TODO: Test the proximity alerts IRL
-        // TODO: How line item should look when it is a complete task
+        // TODO:Figure out font to use for recyclerview items
+        // TODO:Add mapfragment over recyclerview to show current location and all task locations
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        IntentFilter intentFilter = new IntentFilter(INTENT_FILTER_NOTIFY);
+
+        Log.d(TAG, "Registering receiver");
+        registerReceiver(mReceiver, intentFilter);
+    }
 
 
-        // TODO:[LOW] Add mapfragment under recyclerview to show currrent location and all task locations
+    @Override
+    public void onPause(){
+        super.onPause();
+        TaskManager.get(this).saveTasks();
+
+        if(mReceiver != null) {
+            Log.d(TAG, "Unregistering receiver");
+            unregisterReceiver(mReceiver);
+            mReceiver = null;
+        }
     }
 
     @Override
@@ -60,14 +110,10 @@ public class MainActivity extends GoogleApiConnectActivity {
 
         switch (item.getItemId()){
             case R.id.action_new_task:
-                // Add new blank Task to the singleton
-                TaskManager taskManager = TaskManager.get(this);
                 Task task = new Task();
-                taskManager.addTask(task);
+                mTasks.add(task);
 
                 Intent intent = new Intent(this, TaskActivity.class);
-//                intent.putExtra(TaskActivity.EXTRA_TASK_POS, taskManager.getTasks().size()-1);
-                Log.d(TAG, "Starting new task with id = " + task.getId());
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID, task.getId());
 
                 startActivityForResult(intent, 0);
@@ -83,16 +129,10 @@ public class MainActivity extends GoogleApiConnectActivity {
 
     }
 
-    @Override
-    public void onPause(){
-        super.onPause();
-        TaskManager.get(this).saveTasks();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mAdapter.notifyDataSetChanged();
-
         TaskManager.get(this).saveTasks();
     }
 
@@ -102,6 +142,8 @@ public class MainActivity extends GoogleApiConnectActivity {
 
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 Log.d(TAG, "ACCESS_FINE_LOCATION access granted");
+            }else{
+                Log.d(TAG, "ACCESS_FINE_LOCATION not granted");
             }
         }
     }

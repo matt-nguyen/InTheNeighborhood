@@ -5,6 +5,7 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -16,9 +17,9 @@ public class Task {
     private String description;
     private String locName;
     private LatLng locLatLng;
-    private int alertId;
     private boolean isDone;
     private boolean isNearby;
+    private long createdDate;
 
     public Task(){
         this(null, null);
@@ -30,13 +31,16 @@ public class Task {
 
         id = UUID.randomUUID();
         isDone = false;
-        alertId = -1;
+
+        createdDate = new Date().getTime();
     }
 
     public Task(JSONObject json) throws JSONException{
         id = UUID.fromString(json.getString("ID"));
         description = json.getString("DESCRIPTION");
         locName = json.getString("LOCNAME");
+//        createdDate = json.getLong("CREATEDDATE");
+        isDone = json.getBoolean("ISDONE");
 
         // TODO: Test this logic when there's no lat/lng
         double lat = json.getDouble("LAT");
@@ -49,6 +53,8 @@ public class Task {
         jsonObject.put("ID", id.toString());
         jsonObject.put("DESCRIPTION", description);
         jsonObject.put("LOCNAME", locName);
+//        jsonObject.put("CREATEDDATE", createdDate);
+        jsonObject.put("ISDONE", isDone);
 
         if(locLatLng != null) {
             jsonObject.put("LAT", locLatLng.latitude);
@@ -87,14 +93,6 @@ public class Task {
 
     public void setLocLatLng(LatLng locLatLng) {
         this.locLatLng = locLatLng;
-    }
-
-    public int getAlertId() {
-        return alertId;
-    }
-
-    public void setAlertId(int alertId) {
-        this.alertId = alertId;
     }
 
     public boolean isDone() {

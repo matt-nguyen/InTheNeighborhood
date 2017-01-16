@@ -15,15 +15,18 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
-/**
- * Created by unlim on 1/10/2017.
- */
+/***************************************************************************************
+ * Service gets user location updates and marks/unmarks if any tasks are nearby or not
+ *
+ ***************************************************************************************/
 
 public class LocationUpdateService extends IntentService {
 
     private static final String TAG = LocationUpdateService.class.getName();
 
     private final float PROXIMITY_ALERT_RADIUS = (float)0.5 * 1609; // 1609 = 1 mile
+
+    private static Location mLastUserLocation;
 
     public LocationUpdateService(){
         super(TAG);
@@ -38,6 +41,8 @@ public class LocationUpdateService extends IntentService {
             // Check and send notification of any unfinished tasks within range of the user
             if(userLocation != null){
                 Log.d(TAG, "User lat/lng - " + userLocation.getLatitude() + ", " + userLocation.getLongitude());
+
+                mLastUserLocation = userLocation;
 
                 StringBuilder sb = new StringBuilder();
 
@@ -62,20 +67,24 @@ public class LocationUpdateService extends IntentService {
                         Log.d(TAG, "distanceTo - " + distance);
 
                         if(distance < PROXIMITY_ALERT_RADIUS){
-                            sb.append(task.getDescription() + "\n");
-                            task.setNearby(true); // TODO: Testing
+                            sb.append(task.getDescription() + '\n');
+                            task.setNearby(true);
                         }else{
                             task.setNearby(false);
                         }
 
                     }else{
-                        task.setNearby(false); // Make sure nearby is false here
+                        task.setNearby(false);
                     }
                 }
 
                 if(sb.length() > 0){
-                    sendNotification(sb.toString()); // TODO: Testing
+                    sendNotification(sb.toString());
                 }
+
+                // Send broadcast to update adapter on the task list activity
+                Intent notifyAdapterIntent = new Intent(TaskListActivity.INTENT_FILTER_NOTIFY);
+                sendBroadcast(notifyAdapterIntent);
 
             }
         }
@@ -83,17 +92,19 @@ public class LocationUpdateService extends IntentService {
 
     /*********************************************************************************
      * Sends notification of tasks nearby the user that takes them to the task list
+     *
      *********************************************************************************/
     private void sendNotification(String content){
 
-        Intent i = new Intent(this, MainActivity.class);
+        Intent i = new Intent(this, TaskListActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
+        // TODO: Notification layout to apply newline
         Notification notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(android.R.drawable.ic_menu_report_image)
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText("There are tasks nearby:\n" + content)
+                .setContentText("There are tasks nearby:" + '\n' + content)
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .build();
@@ -101,7 +112,15 @@ public class LocationUpdateService extends IntentService {
         NotificationManager nm =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Log.d(TAG, "Sending notification");
+        Log.d(TAG, "Sending notification - " + content);
         nm.notify(0, notification);
+    }
+
+    /**********************************************
+     * Return the most recent location data
+     *
+     **********************************************/
+    public static Location getLastUserLocation() {
+        return mLastUserLocation;
     }
 }
