@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".TaskListActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -42,13 +42,12 @@
             android:label="@string/title_activity_task">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.unlimitedrice.intheneighborhood.MainActivity" />
+                android:value="com.unlimitedrice.intheneighborhood.TaskListActivity" />
         </activity>
-        <receiver android:name=".AlertReceiver">
-            <intent-filter>
-                <action android:name="com.unlimitedrice.intheneighborhood.PROXIMITY_ALERT"/>
-            </intent-filter>
-        </receiver>
+        <service android:name=".LocationUpdateService"/>
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>

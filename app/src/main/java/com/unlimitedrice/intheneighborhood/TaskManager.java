@@ -5,9 +5,10 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.UUID;
 
-/**
- * Created by unlim on 12/20/2016.
- */
+/***************************************************
+ * Singleton that holds and manages all the Tasks
+ *
+ ***************************************************/
 
 public class TaskManager {
 
@@ -19,30 +20,21 @@ public class TaskManager {
     private TaskManager(Context c){
         mContext = c;
 
-        mTaskJsonSerializer = new TaskJSONSerializer(c, "stuff.json");
+        mTaskJsonSerializer = new TaskJSONSerializer(c, "TASKS.json");
 //        mTasks = new ArrayList<>();
 
         mTasks = mTaskJsonSerializer.loadTasks();
     }
 
     public static TaskManager get(Context c){
-
         if(sTaskManager == null){
             sTaskManager = new TaskManager(c.getApplicationContext());
         }
-
         return sTaskManager;
     }
 
     public ArrayList<Task> getTasks(){
         return mTasks;
-    }
-
-    public Task getTask(int pos){
-        if(pos > -1 && pos < mTasks.size()){
-            return mTasks.get(pos);
-        }
-        return null;
     }
 
     public Task getTask(UUID id){
@@ -64,14 +56,17 @@ public class TaskManager {
 
     public void deleteTask(Task t){
         if(mTasks != null) mTasks.remove(t);
-
     }
 
     public void clearTasks(){
-        if(mTasks != null) mTasks.clear();
+        if(mTasks != null) {
+            mTasks.clear();
+        }
     }
 
     public void saveTasks(){
         mTaskJsonSerializer.saveTasks(mTasks);
     }
+
+
 }

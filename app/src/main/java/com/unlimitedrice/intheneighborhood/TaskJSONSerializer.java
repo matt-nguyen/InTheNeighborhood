@@ -15,9 +15,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-/**
- * Created by unlim on 12/21/2016.
- */
+/***************************************************
+ * Class saves and loads task data from a JSON file
+ *
+ ***************************************************/
 
 public class TaskJSONSerializer {
 

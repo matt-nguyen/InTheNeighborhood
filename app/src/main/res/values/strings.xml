@@ -4,8 +4,11 @@
 
     <string name="action_new_task">New Task</string>
     <string name="title_activity_task">Map</string>
+
     <string name="action_delete_task">Delete Task</string>
     <string name="action_clear_all_tasks">Clear All</string>
 
+    <string name="content_select_place">Select Place</string>
     <string name="content_entered_location">You are within a location</string>
+    <string name="content_test_location">You are near the test location</string>
 </resources>
