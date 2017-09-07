@@ -62,8 +62,6 @@ public class TaskListActivity extends GoogleApiConnectActivity {
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // TODO: Add check for google play services
-
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED){
 
@@ -71,8 +69,6 @@ public class TaskListActivity extends GoogleApiConnectActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
 
-        // TODO:Figure out font to use for recyclerview items
-        // TODO:Add mapfragment over recyclerview to show current location and all task locations
     }
 
     @Override
