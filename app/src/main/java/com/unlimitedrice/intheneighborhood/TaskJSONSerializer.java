@@ -30,11 +30,13 @@ public class TaskJSONSerializer {
     }
 
     public void saveTasks(ArrayList<Task> tasks){
+        Log.d("TESTING", "saving tasks");
         JSONArray jsonArray = new JSONArray();
 
         OutputStream out = null;
         try {
             for(Task task : tasks){
+                Log.d("TESTING", "task - " + task.getDescription());
                 jsonArray.put(task.toJson());
             }
 
@@ -60,6 +62,7 @@ public class TaskJSONSerializer {
     }
 
     public ArrayList<Task> loadTasks(){
+        Log.d("TESTING", "loading tasks");
         ArrayList<Task> tasks = new ArrayList<>();
         InputStream in = null;
         BufferedReader br = null;

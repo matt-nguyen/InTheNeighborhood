@@ -1,5 +1,7 @@
 package com.unlimitedrice.intheneighborhood;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
@@ -29,14 +31,19 @@ public class Task {
     }
 
     public Task(JSONObject json) throws JSONException{
+        Log.d("TESTING", "Building task - " + json.toString());
         id = UUID.fromString(json.getString("ID"));
         description = json.getString("DESCRIPTION");
-        locName = json.getString("LOCNAME");
 
+        if(json.has("LOCNAME")) {
+            locName = json.getString("LOCNAME");
+        }
         // TODO: Test this logic when there's no lat/lng
-        double lat = json.getDouble("LAT");
-        double lng = json.getDouble("LNG");
-        locLatLng = new LatLng(lat, lng);
+        if(json.has("LAT") && json.has("LNG")) {
+            double lat = json.getDouble("LAT");
+            double lng = json.getDouble("LNG");
+            locLatLng = new LatLng(lat, lng);
+        }
     }
 
     public JSONObject toJson() throws JSONException{
@@ -49,6 +56,7 @@ public class Task {
             jsonObject.put("LAT", locLatLng.latitude);
             jsonObject.put("LNG", locLatLng.longitude);
         }
+        Log.d("TESTING", "task to json - " + jsonObject.toString());
         return jsonObject;
     }
 

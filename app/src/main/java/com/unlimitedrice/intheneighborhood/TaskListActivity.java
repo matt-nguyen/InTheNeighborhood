@@ -1,6 +1,5 @@
 package com.unlimitedrice.intheneighborhood;
 
-import android.*;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,7 +15,7 @@ import android.view.MenuItem;
 
 import java.util.ArrayList;
 
-public class MainActivity extends GoogleApiConnectActivity {
+public class TaskListActivity extends GoogleApiConnectActivity {
 
     private TaskAdapter mAdapter;
     private ArrayList<Task> mTasks;
@@ -26,11 +25,15 @@ public class MainActivity extends GoogleApiConnectActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.d("TESTING", "onCreate TaskListActivity");
+        TaskListView view = (TaskListView)findViewById(R.id.content);
+
         mTasks = TaskManager.get(this).getTasks();
 
         mAdapter = new TaskAdapter(this, mTasks);
 
-        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.recyclerView);
+//        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.task_recycler_view);
+        RecyclerView recyclerView = view.taskList;
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -40,8 +43,6 @@ public class MainActivity extends GoogleApiConnectActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
 
-
-        // TODO: Add mapfragment under recyclerview to show currrent location and all task locations
     }
 
     @Override
@@ -57,19 +58,20 @@ public class MainActivity extends GoogleApiConnectActivity {
         switch (item.getItemId()){
             case R.id.action_new_task:
                 // Add new blank Task to the singleton
+                Log.d("TESTING", "new task clicked");
                 TaskManager taskManager = TaskManager.get(this);
                 Task task = new Task();
                 taskManager.addTask(task);
 
                 Intent intent = new Intent(this, TaskActivity.class);
-//                intent.putExtra(TaskActivity.EXTRA_TASK_POS, taskManager.getTasks().size()-1);
-                Log.d("MainActivityLog", "Starting new task with id = " + task.getId());
+                Log.d("TESTING", "Starting new task with id = " + task.getId());
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID, task.getId());
 
-                startActivityForResult(intent, 0);
+                startActivityForResult(intent, TaskActivity.REQUEST_CODE);
                 return true;
             case R.id.action_clear_all_tasks:
                 // Delete all tasks
+                Log.d("TESTING", "delete tasks clicked");
                 TaskManager.get(this).clearTasks();
                 mAdapter.notifyDataSetChanged();
                 return true;
@@ -82,7 +84,7 @@ public class MainActivity extends GoogleApiConnectActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("onActivityResult", "Here");
+        Log.d("TESTING", "onActivityResult");
         mAdapter.notifyDataSetChanged();
 
         TaskManager.get(this).saveTasks();

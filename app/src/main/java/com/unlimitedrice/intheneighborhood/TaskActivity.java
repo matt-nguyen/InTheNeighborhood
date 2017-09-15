@@ -32,6 +32,8 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
     private static final float PROXIMITY_ALERT_RADIUS = 1609;
 
+    public static final int REQUEST_CODE = 12;
+
     public static final String EXTRA_TASK_ID =
             "com.unlimitedrice.intheneighborhood.task_id";
     public static final String EXTRA_TASK_POS =
@@ -44,63 +46,39 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
     private LocationManager mLocationManager;
 
+    private TaskView taskView;
+    private TaskPresenter presenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
 
-        Log.d("TaskActivity", "onCreate");
-        Log.d("TaskActivity", "new log");
+        taskView = new TaskView(this);
 //        int position = getIntent().getIntExtra(EXTRA_TASK_POS, 0);
 //        mTask = TaskManager.get(this).getTask(position);
 
         UUID taskId = (UUID)getIntent().getSerializableExtra(EXTRA_TASK_ID);
         Log.d("TaskActivity", "taskId - " + taskId.toString());
-        mTask = TaskManager.get(this).getTask(taskId);
 
-        mDescEditText = (EditText)findViewById(R.id.descriptionEditText);
-        if(mTask.getDescription() != null){
-            mDescEditText.setText(mTask.getDescription());
-        }
-
-        mDescEditText.addTextChangedListener(new TextWatcher() {
+        final TaskModel model = new TaskModel(TaskManager.get(this), taskId);
+        presenter = new TaskPresenter(taskView, model) {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void pickPlace() {
+                PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                mTask.setDescription((editable != null) ? editable.toString() : null);
-            }
-        });
-
-        mSelectPlaceButton = (Button)findViewById(R.id.selectPlaceButton);
-        mSelectPlaceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
                 try {
-                    PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
                     Intent intent = intentBuilder.build(TaskActivity.this);
-
                     startActivityForResult(intent, 0);
-
                 } catch (GooglePlayServicesRepairableException e) {
                     e.printStackTrace();
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
                 }
-            }
-        });
 
-        if(mTask.getLocName() != null){
-            mSelectPlaceButton.setText(mTask.getLocName());
-        }
+            }
+        };
+
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -108,10 +86,8 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
-        // TODO: Add grocery list to task obj and activity
+        setResult(RESULT_OK);
     }
-
 
     /**
      * Manipulates the map once available.
@@ -127,24 +103,26 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             mMap.setMyLocationEnabled(true);
         }
 
+        presenter.initMap(mMap);
+
         // Center map onto task location or on user's location(if no task location)
-        LatLng latLng = mTask.getLocLatLng();
-        if(latLng != null){
-            mMap.addMarker(new MarkerOptions().position(latLng).title(mTask.getLocName()));
-
-            // TODO: Possibly modify zoom to show both the task location and the current location?
-        }else{
-
-            Location currentLocation = GoogleServiceManager.get(this).getLastLocation();
-            if(currentLocation != null) {
-                latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            }else{
-                Log.d("onMapReady", "did not get location");
-            }
-        }
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+//        LatLng latLng = mTask.getLocLatLng();
+//        if(latLng != null){
+//            mMap.addMarker(new MarkerOptions().position(latLng).title(mTask.getLocName()));
+//
+//            // TODO: Possibly modify zoom to show both the task location and the current location?
+//        }else{
+//
+//            Location currentLocation = GoogleServiceManager.get(this).getLastLocation();
+//            if(currentLocation != null) {
+//                latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+//            }else{
+//                Log.d("onMapReady", "did not get location");
+//            }
+//        }
+//
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+//        mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
 
     }
 
@@ -154,22 +132,22 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
         if(resultCode == Activity.RESULT_OK){
             Place place = PlacePicker.getPlace(this, data);
-
+            presenter.updatePlace(place);
             if(place != null) {
 
                 // Update the task and map with the new place
-                String placeName = place.getName().toString();
-                LatLng latLng = place.getLatLng();
-
-                mSelectPlaceButton.setText(placeName);
-
-                mTask.setLocName(placeName);
-                mTask.setLocLatLng(latLng);
-
-                mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(latLng).title(placeName));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+//                String placeName = place.getName().toString();
+//                LatLng latLng = place.getLatLng();
+//
+//                mSelectPlaceButton.setText(placeName);
+//
+//                mTask.setLocName(placeName);
+//                mTask.setLocLatLng(latLng);
+//
+//                mMap.clear();
+//                mMap.addMarker(new MarkerOptions().position(latLng).title(placeName));
+//                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+//                mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
 
 
                 // Add/update the proximity alert
