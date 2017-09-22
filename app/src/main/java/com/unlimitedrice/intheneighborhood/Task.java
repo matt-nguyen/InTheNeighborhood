@@ -15,6 +15,7 @@ import java.util.UUID;
 
 public class Task {
     private UUID id;
+    private int db_id;
     private String description;
     private String locName;
     private String locAddress;
@@ -28,6 +29,17 @@ public class Task {
         id = UUID.randomUUID();
         this.description = description;
         this.locName = locName;
+    }
+
+    public Task(int db_id, String description, String locName, String locAddress, double lat, double lng){
+        this.db_id = db_id;
+        this.description = description;
+        this.locName = locName;
+        this.locAddress = locAddress;
+
+        if(locAddress != null && locAddress.length() > 0){
+            this.locLatLng = new LatLng(lat, lng);
+        }
     }
 
     public Task(JSONObject json) throws JSONException{
@@ -98,5 +110,16 @@ public class Task {
 
     public void setLocLatLng(LatLng locLatLng) {
         this.locLatLng = locLatLng;
+    }
+
+    @Override
+    public String toString() {
+        String latLngPortion = "";
+        if(locLatLng != null){
+            latLngPortion = " , lat - " + locLatLng.latitude + ", lng - " + locLatLng.longitude;
+        }
+
+        return "Task db_id - " + db_id + ", desc - " + description + ", locname - " + locName +
+                ", locaddr - "+ locAddress + latLngPortion;
     }
 }

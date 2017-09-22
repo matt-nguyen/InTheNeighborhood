@@ -29,7 +29,7 @@ public class TaskListActivity extends GoogleApiConnectActivity {
         TaskListView view = (TaskListView)findViewById(R.id.content);
 
         mTasks = TaskManager.get(this).getTasks();
-
+//        mTasks = TaskDbManager.get(this).getTasks();
         mAdapter = new TaskAdapter(this, mTasks);
 
 //        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.task_recycler_view);
