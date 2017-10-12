@@ -14,7 +14,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:hardwareAccelerated="true">
         <activity
             android:name=".TaskListActivity"
             android:label="@string/app_name"
@@ -45,11 +46,21 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.unlimitedrice.intheneighborhood.TaskListActivity" />
         </activity>
+        <activity android:name=".SettingsActivity"
+            android:label="Settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.unlimitedrice.intheneighborhood.TaskListActivity" />
+        </activity>
         <receiver android:name=".AlertReceiver">
             <intent-filter>
                 <action android:name="com.unlimitedrice.intheneighborhood.PROXIMITY_ALERT"/>
             </intent-filter>
         </receiver>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="4d5c6e3e5fdd726145fab60e5a505ac19857bd42" />
     </application>
 
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

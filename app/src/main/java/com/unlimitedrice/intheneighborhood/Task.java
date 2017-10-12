@@ -1,5 +1,6 @@
 package com.unlimitedrice.intheneighborhood;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -15,11 +16,12 @@ import java.util.UUID;
 
 public class Task {
     private UUID id;
-    private int db_id;
+    private int db_id = -1;
     private String description;
     private String locName;
     private String locAddress;
     private LatLng locLatLng;
+    private Bitmap locMapImage;
 
     public Task(){
         this(null, null);
@@ -31,11 +33,12 @@ public class Task {
         this.locName = locName;
     }
 
-    public Task(int db_id, String description, String locName, String locAddress, double lat, double lng){
+    public Task(int db_id, String description, String locName, String locAddress, double lat, double lng, Bitmap locMapImage){
         this.db_id = db_id;
         this.description = description;
         this.locName = locName;
         this.locAddress = locAddress;
+        this.locMapImage = locMapImage;
 
         if(locAddress != null && locAddress.length() > 0){
             this.locLatLng = new LatLng(lat, lng);
@@ -80,6 +83,14 @@ public class Task {
         this.id = id;
     }
 
+    public int getDb_id() {
+        return db_id;
+    }
+
+    public void setDb_id(int db_id) {
+        this.db_id = db_id;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -110,6 +121,14 @@ public class Task {
 
     public void setLocLatLng(LatLng locLatLng) {
         this.locLatLng = locLatLng;
+    }
+
+    public Bitmap getLocMapImage() {
+        return locMapImage;
+    }
+
+    public void setLocMapImage(Bitmap locMapImage) {
+        this.locMapImage = locMapImage;
     }
 
     @Override

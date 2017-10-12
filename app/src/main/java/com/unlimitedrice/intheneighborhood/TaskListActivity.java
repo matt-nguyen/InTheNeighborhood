@@ -1,9 +1,14 @@
 package com.unlimitedrice.intheneighborhood;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -13,26 +18,35 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 
 public class TaskListActivity extends GoogleApiConnectActivity {
 
     private TaskAdapter mAdapter;
     private ArrayList<Task> mTasks;
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("TESTING", "received broadcast");
+            mTasks = getTasks();
+            mAdapter.refresh(mTasks);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
         Log.d("TESTING", "onCreate TaskListActivity");
-        TaskListView view = (TaskListView)findViewById(R.id.content);
+        TaskListView view = findViewById(R.id.content);
 
-        mTasks = TaskManager.get(this).getTasks();
-//        mTasks = TaskDbManager.get(this).getTasks();
+        mTasks = getTasks();
         mAdapter = new TaskAdapter(this, mTasks);
 
-//        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.task_recycler_view);
         RecyclerView recyclerView = view.taskList;
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -43,6 +57,18 @@ public class TaskListActivity extends GoogleApiConnectActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(TaskOpenHelper.DB_UPDATED));
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(receiver);
+        super.onPause();
     }
 
     @Override
@@ -59,21 +85,21 @@ public class TaskListActivity extends GoogleApiConnectActivity {
             case R.id.action_new_task:
                 // Add new blank Task to the singleton
                 Log.d("TESTING", "new task clicked");
-                TaskManager taskManager = TaskManager.get(this);
-                Task task = new Task();
-                taskManager.addTask(task);
-
-                Intent intent = new Intent(this, TaskActivity.class);
-                Log.d("TESTING", "Starting new task with id = " + task.getId());
-                intent.putExtra(TaskActivity.EXTRA_TASK_ID, task.getId());
-
-                startActivityForResult(intent, TaskActivity.REQUEST_CODE);
+//                startActivityForResult(
+//                        new Intent(this, TaskActivity.class),
+//                        TaskActivity.REQUEST_CODE
+//                );
+                startActivity(new Intent(this, TaskActivity.class));
                 return true;
             case R.id.action_clear_all_tasks:
                 // Delete all tasks
-                Log.d("TESTING", "delete tasks clicked");
-                TaskManager.get(this).clearTasks();
-                mAdapter.notifyDataSetChanged();
+                TaskDbManager.get(this).clearTasks();
+                return true;
+            case R.id.action_settings:
+                startActivityForResult(
+                        new Intent(this, SettingsActivity.class),
+                        SettingsActivity.REQUEST_CODE
+                );
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -81,13 +107,17 @@ public class TaskListActivity extends GoogleApiConnectActivity {
 
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("TESTING", "onActivityResult");
-        mAdapter.notifyDataSetChanged();
+        super.onActivityResult(requestCode, resultCode, data);
 
-        TaskManager.get(this).saveTasks();
+        if(requestCode == SettingsActivity.REQUEST_CODE){
+            Log.d("TESTING", "Settings done");
+
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            Log.d("TESTING", "gps? - " + prefs.getBoolean("pref_gps", true));
+            Log.d("TESTING", "distance? - " + prefs.getInt("pref_distance", 1));
+        }
     }
 
     @Override
@@ -101,4 +131,7 @@ public class TaskListActivity extends GoogleApiConnectActivity {
     }
 
 
+    private ArrayList<Task> getTasks(){
+        return TaskDbManager.get(this).getTasks();
+    }
 }

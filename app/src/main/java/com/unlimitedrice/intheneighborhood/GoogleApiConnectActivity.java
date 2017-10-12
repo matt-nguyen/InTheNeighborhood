@@ -15,7 +15,7 @@ public class GoogleApiConnectActivity extends AppCompatActivity {
         super.onStart();
 //        Log.d("GoogleApiConnectActivit", "Connecting to google client");
         if (!GoogleServiceManager.get(this).getClient().isConnected()) {
-            Log.d("TESTING", "connecting to google play");
+//            Log.d("TESTING", "connecting to google play");
             GoogleServiceManager.get(this).getClient().connect();
         }
 

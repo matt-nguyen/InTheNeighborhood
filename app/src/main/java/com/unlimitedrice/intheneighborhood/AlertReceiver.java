@@ -30,7 +30,8 @@ public class AlertReceiver extends BroadcastReceiver {
             // Build intent to go to the task on click of notification
             Intent i = new Intent(context, TaskActivity.class);
 
-            UUID taskId = (UUID)intent.getSerializableExtra(TaskActivity.EXTRA_TASK_ID);
+//            UUID taskId = (UUID)intent.getSerializableExtra(TaskActivity.EXTRA_TASK_ID);
+            int taskId = intent.getIntExtra(TaskActivity.EXTRA_TASK_ID, -1);
             i.putExtra(TaskActivity.EXTRA_TASK_ID, taskId);
 
             PendingIntent pi = PendingIntent.getActivity(context, 0, i, 0);

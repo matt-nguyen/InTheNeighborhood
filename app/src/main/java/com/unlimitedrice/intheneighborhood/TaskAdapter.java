@@ -9,6 +9,7 @@ import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,12 +34,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
         // in each row
         public TextView descriptionTextView;
         public TextView locNameTextView;
+        public TextView locAddrTextView;
+        public ImageView locMapImageView;
 
         // Parameter is the entire item row view
         public ViewHolder(View v){
             super(v);
             descriptionTextView = (TextView)v.findViewById(R.id.descriptionTextView);
             locNameTextView = (TextView)v.findViewById(R.id.locNameTextView);
+            locAddrTextView = (TextView)v.findViewById(R.id.locAddrTextView);
+            locMapImageView = (ImageView)v.findViewById(R.id.locMapImageView);
         }
     }
 
@@ -49,6 +54,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
         Log.d("TaskAdapter", "Task size - " + mTasks.size());
     }
 
+    public void refresh(List<Task> updatedTasks){
+        mTasks = updatedTasks;
+        notifyDataSetChanged();
+    }
 
     /****************************************************************
      * Where we inflate layouts to create and return the ViewHolder
@@ -62,7 +71,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         // Inflate layout of the list item
-        View taskView = inflater.inflate(R.layout.item_task, parent, false);
+        View taskView = inflater.inflate(R.layout.item_task2, parent, false);
         Log.d("onCreateViewHolder", "layout inflated");
         return new ViewHolder(taskView);
     }
@@ -77,14 +86,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> im
 
         holder.descriptionTextView.setText(task.getDescription());
         holder.locNameTextView.setText(task.getLocName());
+        holder.locAddrTextView.setText(task.getLocAddress());
+        holder.locMapImageView.setImageBitmap(task.getLocMapImage());
 
         // Clicking on the task viewholder will open the TaskActivity
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, TaskActivity.class);
-//                intent.putExtra(TaskActivity.EXTRA_TASK_POS, position);
-                intent.putExtra(TaskActivity.EXTRA_TASK_ID, mTasks.get(position).getId());
+                intent.putExtra(TaskActivity.EXTRA_TASK_ID, mTasks.get(position).getDb_id());
 
                 ((Activity)mContext).startActivityForResult(intent, 0);
             }
