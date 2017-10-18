@@ -1,16 +1,12 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.ui.task;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-
-import java.util.UUID;
-
-/**
- * Created by unlim on 9/15/2017.
- */
+import com.nghianguyen.intheneighborhood.data.Task;
+import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 
 public class TaskModel {
 

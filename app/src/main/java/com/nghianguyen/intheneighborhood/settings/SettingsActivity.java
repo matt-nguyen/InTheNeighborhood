@@ -1,4 +1,4 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.settings;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
@@ -6,9 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
-/**
- * Created by unlim on 10/12/2017.
- */
+import com.nghianguyen.intheneighborhood.R;
 
 public class SettingsActivity extends AppCompatActivity {
     public static final int REQUEST_CODE = 2;

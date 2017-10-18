@@ -1,24 +1,10 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.data;
 
-import android.app.PendingIntent;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.location.LocationManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.PermissionChecker;
-import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
 
 import java.util.ArrayList;
-
-/**
- * Created by unlim on 9/21/2017.
- */
 
 public class TaskDbManager {
     private static TaskDbManager taskDbManager;
@@ -64,8 +50,8 @@ public class TaskDbManager {
 
     public void clearTasks(){
         dbHelper.clearTasks();
-//        removeProximityAlerts();
-        proximityAlertManager.removeProximityAlerts(dbHelper.getTasks());
+//        removeAllProximityAlerts();
+        proximityAlertManager.removeAllProximityAlerts(dbHelper.getTasks());
     }
 
 //    private void addProximityAlert(Task t, long id){
@@ -89,7 +75,7 @@ public class TaskDbManager {
 //        }
 //    }
 //
-//    private void removeProximityAlerts(){
+//    private void removeAllProximityAlerts(){
 //        if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
 //                == PackageManager.PERMISSION_GRANTED) {
 //

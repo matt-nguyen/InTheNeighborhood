@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.unlimitedrice.intheneighborhood.TaskListActivity">
+    tools:context="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity">
     <item
         android:id="@+id/action_new_task"
         android:orderInCategory="100"

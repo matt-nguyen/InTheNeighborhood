@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.unlimitedrice.intheneighborhood">
+    package="com.nghianguyen.intheneighborhood">
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -17,7 +17,7 @@
         android:theme="@style/AppTheme"
         android:hardwareAccelerated="true">
         <activity
-            android:name=".TaskListActivity"
+            android:name="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme"
             android:launchMode="singleTop">
@@ -40,21 +40,21 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".TaskActivity"
+            android:name="com.nghianguyen.intheneighborhood.ui.task.TaskActivity"
             android:label="@string/title_activity_task">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.unlimitedrice.intheneighborhood.TaskListActivity" />
+                android:value="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity" />
         </activity>
-        <activity android:name=".SettingsActivity"
+        <activity android:name="com.nghianguyen.intheneighborhood.settings.SettingsActivity"
             android:label="Settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.unlimitedrice.intheneighborhood.TaskListActivity" />
+                android:value="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity" />
         </activity>
-        <receiver android:name=".AlertReceiver">
+        <receiver android:name="com.nghianguyen.intheneighborhood.alert.AlertReceiver">
             <intent-filter>
-                <action android:name="com.unlimitedrice.intheneighborhood.PROXIMITY_ALERT"/>
+                <action android:name="com.nghianguyen.intheneighborhood.PROXIMITY_ALERT"/>
             </intent-filter>
         </receiver>
         <meta-data

@@ -1,14 +1,12 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.ui.tasklist;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,6 +17,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.nghianguyen.intheneighborhood.R;
+import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
+import com.nghianguyen.intheneighborhood.data.Task;
+import com.nghianguyen.intheneighborhood.data.TaskDbManager;
+import com.nghianguyen.intheneighborhood.data.TaskOpenHelper;
+import com.nghianguyen.intheneighborhood.map.GoogleApiConnectActivity;
+import com.nghianguyen.intheneighborhood.settings.SettingsActivity;
+import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
+
 import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 
@@ -26,14 +37,12 @@ public class TaskListActivity extends GoogleApiConnectActivity {
 
     private TaskAdapter mAdapter;
     private ArrayList<Task> mTasks;
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("TESTING", "received broadcast");
-            mTasks = getTasks();
-            mAdapter.refresh(mTasks);
-        }
-    };
+
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+
+    private BroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +50,6 @@ public class TaskListActivity extends GoogleApiConnectActivity {
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
-        Log.d("TESTING", "onCreate TaskListActivity");
         TaskListView view = findViewById(R.id.content);
 
         mTasks = getTasks();
@@ -51,23 +59,44 @@ public class TaskListActivity extends GoogleApiConnectActivity {
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mTasks = getTasks();
+                mAdapter.refresh(mTasks);
+            }
+        };
+
+        fusedLocationProviderClient = new FusedLocationProviderClient(this);
+        locationRequest = new LocationRequest()
+                .setInterval(10 * 1000)
+                .setFastestInterval(5 * 1000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationCallback = new LocationCallback(){
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                mAdapter.updateNearbyTasks(locationResult.getLastLocation());
+            }
+        };
+
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter(TaskOpenHelper.DB_UPDATED));
+        startLocationUpdates();
     }
 
     @Override
     protected void onPause() {
         unregisterReceiver(receiver);
+        stopLocationUpdates();
         super.onPause();
     }
 
@@ -84,11 +113,6 @@ public class TaskListActivity extends GoogleApiConnectActivity {
         switch (item.getItemId()){
             case R.id.action_new_task:
                 // Add new blank Task to the singleton
-                Log.d("TESTING", "new task clicked");
-//                startActivityForResult(
-//                        new Intent(this, TaskActivity.class),
-//                        TaskActivity.REQUEST_CODE
-//                );
                 startActivity(new Intent(this, TaskActivity.class));
                 return true;
             case R.id.action_clear_all_tasks:
@@ -112,11 +136,8 @@ public class TaskListActivity extends GoogleApiConnectActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
-            Log.d("TESTING", "Settings done");
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            Log.d("TESTING", "gps? - " + prefs.getBoolean("pref_gps", true));
-            Log.d("TESTING", "distance? - " + prefs.getInt("pref_distance", 1));
+            // TODO: Refactor?
+            new ProximityAlertManager(this).updateAllProximityAlerts(getTasks());
         }
     }
 
@@ -130,6 +151,16 @@ public class TaskListActivity extends GoogleApiConnectActivity {
         }
     }
 
+    private void startLocationUpdates(){
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED){
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        }
+    }
+
+    private void stopLocationUpdates(){
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+    }
 
     private ArrayList<Task> getTasks(){
         return TaskDbManager.get(this).getTasks();

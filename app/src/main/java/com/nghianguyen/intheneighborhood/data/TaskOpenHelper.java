@@ -1,4 +1,4 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,19 +9,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-/**
- * Created by unlim on 9/21/2017.
- */
-
 public class TaskOpenHelper extends SQLiteOpenHelper {
-    public static final String DB_UPDATED = "com.unlimitedrice.intheneighborhood.TaskOpenHelper.DB_UPDATED";
+    public static final String DB_UPDATED = "com.nghianguyen.intheneighborhood.TaskOpenHelper.DB_UPDATED";
 
     private static final String DATABASE_NAME = "tasks";
     private static final int DATABASE_VERSION = 2;

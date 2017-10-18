@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.unlimitedrice.intheneighborhood.TaskListView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.nghianguyen.intheneighborhood.ui.tasklist.TaskListView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.unlimitedrice.intheneighborhood.TaskListActivity"
+    tools:context="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity"
     android:id="@+id/content">
 
     <android.support.v7.widget.RecyclerView
@@ -13,4 +13,4 @@
         android:layout_height="match_parent" />
 
 
-</com.unlimitedrice.intheneighborhood.TaskListView>
+</com.nghianguyen.intheneighborhood.ui.tasklist.TaskListView>

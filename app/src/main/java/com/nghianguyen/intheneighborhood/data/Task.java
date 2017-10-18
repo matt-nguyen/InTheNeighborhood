@@ -1,4 +1,4 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.data;
 
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -10,10 +10,6 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
-/**
- * Created by unlim on 12/8/2016.
- */
-
 public class Task {
     private UUID id;
     private int db_id = -1;
@@ -22,6 +18,7 @@ public class Task {
     private String locAddress;
     private LatLng locLatLng;
     private Bitmap locMapImage;
+    private boolean isNearby = false;
 
     public Task(){
         this(null, null);
@@ -129,6 +126,14 @@ public class Task {
 
     public void setLocMapImage(Bitmap locMapImage) {
         this.locMapImage = locMapImage;
+    }
+
+    public boolean isNearby() {
+        return isNearby;
+    }
+
+    public void setNearby(boolean nearby) {
+        isNearby = nearby;
     }
 
     @Override

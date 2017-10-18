@@ -1,4 +1,4 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.settings;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,9 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.NumberPicker;
 
-/**
- * Created by unlim on 10/12/2017.
- */
+import com.nghianguyen.intheneighborhood.R;
 
 public class DistancePickerPreference extends DialogPreference {
     private NumberPicker numberPicker;

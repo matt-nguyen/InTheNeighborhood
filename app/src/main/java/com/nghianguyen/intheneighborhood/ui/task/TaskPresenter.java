@@ -1,18 +1,11 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.ui.task;
 
-import android.*;
-import android.Manifest;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.location.LocationManager;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -21,10 +14,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-/**
- * Created by unlim on 9/15/2017.
- */
+import com.nghianguyen.intheneighborhood.data.Task;
 
 public abstract class TaskPresenter {
 
@@ -32,11 +22,13 @@ public abstract class TaskPresenter {
     private final TaskView view;
     private final TaskModel model;
     private GoogleMap map;
+    private TaskActivity activity;
 
-    public TaskPresenter(TaskView view, final TaskModel model){
+    public TaskPresenter(TaskView view, final TaskModel model, TaskActivity activity){
         this.view = view;
         this.task = model.task();
         this.model = model;
+        this.activity = activity;
 
         view.descriptionEditText.setText(task.getDescription());
 
@@ -82,8 +74,8 @@ public abstract class TaskPresenter {
             model.setLocName(placeName);
             model.setLocAddr(place.getAddress().toString());
             model.setLocLatLng(latLng);
-            saveSnapshot();
 
+            saveSnapshot();
         }
     }
 
@@ -91,10 +83,11 @@ public abstract class TaskPresenter {
     public void initMap(GoogleMap googleMap, Location currentLocation){
         this.map = googleMap;
 
+        float zoom = 13;
         LatLng locLatLng = task.getLocLatLng();
         if(locLatLng != null){
             map.addMarker(new MarkerOptions().position(locLatLng).title(task.getLocName()));
-
+            zoom = 16;
         }else{
             if(currentLocation != null){
                 locLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
@@ -103,8 +96,9 @@ public abstract class TaskPresenter {
 
         if(locLatLng != null) {
             map.moveCamera(CameraUpdateFactory.newLatLng(locLatLng));
-            map.animateCamera(CameraUpdateFactory.zoomTo(13));
+            map.animateCamera(CameraUpdateFactory.zoomTo(zoom));
         }
+
     }
 
     public void finish(){
@@ -112,25 +106,46 @@ public abstract class TaskPresenter {
     }
 
     private void saveSnapshot(){
-        setMyLocationEnabled(false); // hide the current location indicator for the snapshot
-        map.snapshot(new GoogleMap.SnapshotReadyCallback() {
+
+        setMyLocationEnabled(false);
+        new Thread(new Runnable() {
             @Override
-            public void onSnapshotReady(Bitmap bitmap) {
+            public void run() {
+                try{
+                    Thread.sleep(500);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }finally {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            map.snapshot(new GoogleMap.SnapshotReadyCallback() {
+                                @Override
+                                public void onSnapshotReady(Bitmap bitmap) {
+                                    if(bitmap != null) {
+                                        // Determine start of Y for cropping
+                                        int height = bitmap.getHeight();
+                                        int newHeight = (int) (height * 0.3);
+                                        int startY = (height - newHeight) / 2;
 
-                if(bitmap != null) {
-                    // Determine start of Y for cropping
-                    int height = bitmap.getHeight();
-                    int newHeight = (int) (height * 0.3);
-                    int startY = (height - newHeight) / 2;
+                                        model.setLocMapImage(
+                                                Bitmap.createBitmap(bitmap, 0, startY,
+                                                        bitmap.getWidth(), newHeight)
+                                        );
 
-                    model.setLocMapImage(
-                            Bitmap.createBitmap(bitmap, 0, startY, bitmap.getWidth(), newHeight)
-                    );
-
-                    setMyLocationEnabled(true); // display the current indicator after snapshot
+                                        // display the current indicator after snapshot
+                                        setMyLocationEnabled(true);
+                                    }
+                                }
+                            });
+                        }
+                    });
                 }
             }
-        });
+        }).start();
+
+
+
 
     }
 

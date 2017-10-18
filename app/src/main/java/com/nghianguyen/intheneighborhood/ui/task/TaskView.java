@@ -1,9 +1,10 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.ui.task;
 
 import android.app.Activity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.nghianguyen.intheneighborhood.R;
 
 public class TaskView {
 
