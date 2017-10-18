@@ -1,7 +1,9 @@
 package com.nghianguyen.intheneighborhood.map;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -12,14 +14,20 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/map/GoogleServiceManager.java
+=======
+
+>>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/GoogleServiceManager.java
 public class GoogleServiceManager implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
 
+    private static final String TAG = GoogleServiceManager.class.getName();
+
     private static GoogleServiceManager sGoogleApiClientObj;
     private static GoogleApiClient mGoogleApiClient;
-    private Location lastLocation;
     private Context mContext;
 
     private GoogleServiceManager(Context context){
@@ -58,13 +66,12 @@ public class GoogleServiceManager implements GoogleApiClient.ConnectionCallbacks
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+        mGoogleApiClient.connect();
     }
 
-    /**************************************************
-     * Returns the most recent Location of the device.
-     **************************************************/
-    public Location getLastLocation(){
-        return lastLocation;
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
 
     /*************************************************************
@@ -77,13 +84,24 @@ public class GoogleServiceManager implements GoogleApiClient.ConnectionCallbacks
                 PackageManager.PERMISSION_GRANTED) {
             Log.d("GoogleServiceManager", "Getting last location");
 
-            lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            LocationRequest locationRequest = new LocationRequest();
+            locationRequest.setInterval(1000)
+                    .setFastestInterval(1000)
+                    .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+            if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Requesting location services");
+
+                Intent intent = new Intent(mContext, LocationUpdateService.class);
+                PendingIntent pendingIntent = PendingIntent.getService(mContext, 0, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                        locationRequest,
+                        pendingIntent);
+            }
         }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
     }
 
     @Override

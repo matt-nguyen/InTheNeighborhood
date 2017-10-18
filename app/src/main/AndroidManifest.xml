@@ -17,7 +17,11 @@
         android:theme="@style/AppTheme"
         android:hardwareAccelerated="true">
         <activity
+<<<<<<< HEAD
             android:name="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity"
+=======
+            android:name=".TaskListActivity"
+>>>>>>> origin/master
             android:label="@string/app_name"
             android:theme="@style/AppTheme"
             android:launchMode="singleTop">
@@ -27,14 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
-        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -44,6 +40,7 @@
             android:label="@string/title_activity_task">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
+<<<<<<< HEAD
                 android:value="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity" />
         </activity>
         <activity android:name="com.nghianguyen.intheneighborhood.settings.SettingsActivity"
@@ -60,6 +57,14 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="4d5c6e3e5fdd726145fab60e5a505ac19857bd42" />
+=======
+                android:value="com.unlimitedrice.intheneighborhood.TaskListActivity" />
+        </activity>
+        <service android:name=".LocationUpdateService"/>
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+>>>>>>> origin/master
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
