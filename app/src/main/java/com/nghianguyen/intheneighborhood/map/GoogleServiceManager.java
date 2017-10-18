@@ -1,4 +1,4 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.map;
 
 import android.Manifest;
 import android.content.Context;
@@ -13,10 +13,6 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-
-/**
- * Created by unlim on 12/21/2016.
- */
 
 public class GoogleServiceManager implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{

@@ -1,4 +1,4 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

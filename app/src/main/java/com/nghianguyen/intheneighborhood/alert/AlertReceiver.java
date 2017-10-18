@@ -1,4 +1,4 @@
-package com.unlimitedrice.intheneighborhood;
+package com.nghianguyen.intheneighborhood.alert;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -10,13 +10,13 @@ import android.location.LocationManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import java.util.UUID;
-
-/**
- * Created by unlim on 12/28/2016.
- */
+import com.nghianguyen.intheneighborhood.R;
+import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
 
 public class AlertReceiver extends BroadcastReceiver {
+
+    public static final String EXTRA_TASK_ID = "com.nghianguyen.intheneighborhood.task_id";
+    public static final String EXTRA_TASK_DESC = "com.nghianguyen.intheneighborhood.task_desc";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -30,15 +30,17 @@ public class AlertReceiver extends BroadcastReceiver {
             // Build intent to go to the task on click of notification
             Intent i = new Intent(context, TaskActivity.class);
 
-            UUID taskId = (UUID)intent.getSerializableExtra(TaskActivity.EXTRA_TASK_ID);
+            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
             i.putExtra(TaskActivity.EXTRA_TASK_ID, taskId);
 
             PendingIntent pi = PendingIntent.getActivity(context, 0, i, 0);
 
+            String taskDescription = intent.getStringExtra(EXTRA_TASK_DESC);
+
             Notification notification = new NotificationCompat.Builder(context)
                     .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                    .setContentTitle(context.getString(R.string.app_name))
-                    .setContentText(context.getString(R.string.content_entered_location))
+                    .setContentTitle(context.getString(R.string.notification_title))
+                    .setContentText(taskDescription)
                     .setContentIntent(pi)
                     .setAutoCancel(true)
                     .build();

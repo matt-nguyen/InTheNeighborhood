@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="pref_gps"
+        android:title="Toggle GPS"
+        android:summary="Turning on GPS allows you to get alerts when you're near a location"
+        android:defaultValue="true"/>
+    <com.nghianguyen.intheneighborhood.settings.DistancePickerPreference
+        android:key="pref_distance"
+        android:title="Alert Distance"
+        android:summary="How close to a location you want to be notified"
+        android:defaultValue="1"/>
+</PreferenceScreen>
