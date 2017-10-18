@@ -8,7 +8,6 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
 import java.util.UUID;
 
 public class Task {
@@ -16,28 +15,19 @@ public class Task {
     private int db_id = -1;
     private String description;
     private String locName;
+    private String locAddress;
     private LatLng locLatLng;
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/data/Task.java
     private Bitmap locMapImage;
     private boolean isNearby = false;
-=======
-    private boolean isDone;
-    private boolean isNearby;
-    private long createdDate;
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/Task.java
 
     public Task(){
         this(null, null);
     }
 
     public Task(String description, String locName){
+        id = UUID.randomUUID();
         this.description = description;
         this.locName = locName;
-
-        id = UUID.randomUUID();
-        isDone = false;
-
-        createdDate = new Date().getTime();
     }
 
     public Task(int db_id, String description, String locName, String locAddress, double lat, double lng, Bitmap locMapImage){
@@ -56,12 +46,6 @@ public class Task {
         Log.d("TESTING", "Building task - " + json.toString());
         id = UUID.fromString(json.getString("ID"));
         description = json.getString("DESCRIPTION");
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/data/Task.java
-=======
-        locName = json.getString("LOCNAME");
-//        createdDate = json.getLong("CREATEDDATE");
-        isDone = json.getBoolean("ISDONE");
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/Task.java
 
         if(json.has("LOCNAME")) {
             locName = json.getString("LOCNAME");
@@ -79,8 +63,6 @@ public class Task {
         jsonObject.put("ID", id.toString());
         jsonObject.put("DESCRIPTION", description);
         jsonObject.put("LOCNAME", locName);
-//        jsonObject.put("CREATEDDATE", createdDate);
-        jsonObject.put("ISDONE", isDone);
 
         if(locLatLng != null) {
             jsonObject.put("LAT", locLatLng.latitude);
@@ -122,6 +104,14 @@ public class Task {
         this.locName = locName;
     }
 
+    public String getLocAddress() {
+        return locAddress;
+    }
+
+    public void setLocAddress(String locAddress) {
+        this.locAddress = locAddress;
+    }
+
     public LatLng getLocLatLng() {
         return locLatLng;
     }
@@ -130,21 +120,12 @@ public class Task {
         this.locLatLng = locLatLng;
     }
 
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/data/Task.java
     public Bitmap getLocMapImage() {
         return locMapImage;
     }
 
     public void setLocMapImage(Bitmap locMapImage) {
         this.locMapImage = locMapImage;
-=======
-    public boolean isDone() {
-        return isDone;
-    }
-
-    public void setDone(boolean done) {
-        isDone = done;
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/Task.java
     }
 
     public boolean isNearby() {
@@ -154,7 +135,6 @@ public class Task {
     public void setNearby(boolean nearby) {
         isNearby = nearby;
     }
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/data/Task.java
 
     @Override
     public String toString() {
@@ -166,6 +146,4 @@ public class Task {
         return "Task db_id - " + db_id + ", desc - " + description + ", locname - " + locName +
                 ", locaddr - "+ locAddress + latLngPortion;
     }
-=======
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/Task.java
 }

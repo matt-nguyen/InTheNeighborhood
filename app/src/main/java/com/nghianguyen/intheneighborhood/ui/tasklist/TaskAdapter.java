@@ -3,24 +3,15 @@ package com.nghianguyen.intheneighborhood.ui.tasklist;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/ui/tasklist/TaskAdapter.java
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
-=======
-import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/TaskAdapter.java
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/ui/tasklist/TaskAdapter.java
 import android.widget.ImageView;
-=======
-import android.widget.LinearLayout;
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/TaskAdapter.java
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -28,14 +19,7 @@ import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.data.Task;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
 
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/ui/tasklist/TaskAdapter.java
 import java.util.List;
-=======
-/*********************************************************************
- * Adapter for the recycler view that will display the list of Tasks
- *
- *********************************************************************/
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/TaskAdapter.java
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
 
@@ -77,11 +61,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
     public void onBindViewHolder(final ViewHolder holder, final int position) {
 
         Task task = mTasks.get(position);
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/ui/tasklist/TaskAdapter.java
-=======
-//        Log.d("onBindViewHolder", "Position - " + position + " : " + task.getDescription()
-//                + " - " + task.getLocName());
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/TaskAdapter.java
 
         String append = "";
         if(task.isNearby()){
@@ -93,53 +72,17 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
         holder.locAddrTextView.setText(task.getLocAddress());
         holder.locMapImageView.setImageBitmap(task.getLocMapImage());
 
-        // Highlight line item if task is done or nearby
-        int colorId = -1;
-        if(task.isDone()) {
-            // TODO: Make background highlight gray for tasks done
-            colorId = R.color.colorGrayHighlight;
-        }else if(task.isNearby()) {
-            // TODO: Make background highlight green for tasks nearby
-            colorId = R.color.colorGreenHighlight;
-        }else{
-            colorId = R.color.colorWhite;
-        }
-
-        if(colorId != -1){
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(),
-                    colorId));
-        }
-
         // Clicking on the task viewholder will open the TaskActivity
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, TaskActivity.class);
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/ui/tasklist/TaskAdapter.java
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID, mTasks.get(position).getDb_id());
-=======
-                intent.putExtra(TaskActivity.EXTRA_TASK_ID, mTasks.get(position).getId());
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/TaskAdapter.java
 
                 ((Activity)mContext).startActivityForResult(intent, 0);
             }
         });
 
-<<<<<<< HEAD:app/src/main/java/com/nghianguyen/intheneighborhood/ui/tasklist/TaskAdapter.java
-=======
-        // Update the position of the long clicked task so the context menu
-        // would perform on the correct task
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mPositionPressed = holder.getAdapterPosition();
-                Log.d("onLongClick", ""+mPositionPressed);
-                return true;
-            }
-        });
-
-        holder.itemView.setOnCreateContextMenuListener(this);
->>>>>>> origin/master:app/src/main/java/com/unlimitedrice/intheneighborhood/TaskAdapter.java
     }
 
     @Override
