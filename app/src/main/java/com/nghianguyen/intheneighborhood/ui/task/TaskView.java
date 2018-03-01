@@ -74,7 +74,7 @@ public class TaskView implements TaskContact.View{
         isDoneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                presenter.setDone(b);
+                presenter.markDoneStatus(b);
             }
         });
 

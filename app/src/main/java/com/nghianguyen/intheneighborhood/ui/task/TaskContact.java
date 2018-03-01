@@ -1,6 +1,9 @@
 package com.nghianguyen.intheneighborhood.ui.task;
 
+import android.location.Location;
+
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.maps.GoogleMap;
 
 public interface TaskContact {
 
@@ -15,12 +18,18 @@ public interface TaskContact {
     }
 
     interface Presenter{
+        void initializeMap(GoogleMap googleMap, Location currentLocation);
+
         void pickPlace();
 
         void updatePlace(Place place);
 
         void setDescription(String description);
 
-        void setDone(boolean isDone);
+        void markDoneStatus(boolean isDone);
+
+        void saveSnapshot();
+
+        void finish();
     }
 }

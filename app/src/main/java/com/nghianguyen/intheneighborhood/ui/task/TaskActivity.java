@@ -1,13 +1,12 @@
 package com.nghianguyen.intheneighborhood.ui.task;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -17,19 +16,19 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.nghianguyen.intheneighborhood.R;
+import com.nghianguyen.intheneighborhood.core.MapsService;
+import com.nghianguyen.intheneighborhood.core.ThreadsService;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.map.GoogleApiConnectActivity;
 import com.nghianguyen.intheneighborhood.map.GoogleServiceManager;
 
-public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback {
+public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback, ThreadsService, MapsService {
 
     public static final String EXTRA_TASK_ID =
             "com.nghianguyen.intheneighborhood.task_id";
 
-    private GoogleMap mMap;
-
     private TaskView taskView;
-    private TaskPresenter presenter;
+    private TaskContact.Presenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,25 +43,9 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
         }
 
-        final TaskModel model = new TaskModel(TaskDbManager.get(this), taskId);
-        presenter = new TaskPresenter(taskView, model, this) {
-            @Override
-            public void pickPlace() {
-                PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+        TaskModel model = new TaskModel(TaskDbManager.get(this), taskId);
+        presenter = new TaskPresenter(taskView, model, this, this, this);
 
-                try {
-                    Intent intent = intentBuilder.build(TaskActivity.this);
-                    startActivityForResult(intent, 0);
-                } catch (GooglePlayServicesRepairableException e) {
-                    e.printStackTrace();
-                } catch (GooglePlayServicesNotAvailableException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        };
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -75,29 +58,63 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         super.onDestroy();
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.d("onMapReady", "on map ready");
-        mMap = googleMap;
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-        }
+        setMyLocationEnabled(googleMap, true);
 
         Location currentLocation = GoogleServiceManager.get(this).getLastLocation();
-        presenter.initMap(mMap, currentLocation);
+        presenter.initializeMap(googleMap, currentLocation);
 
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("onActivityResult", "done picking");
+    public void pickPlace() {
+        PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
 
+        try {
+            Intent intent = intentBuilder.build(TaskActivity.this);
+            startActivityForResult(intent, 0);
+        } catch (GooglePlayServicesRepairableException e) {
+            Toast.makeText(this,
+                    "You need Google Play Services installed/updated in order to use this feature",
+                    Toast.LENGTH_LONG).show();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            Toast.makeText(this, "Services unavailable to pick location", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void setMyLocationEnabled(GoogleMap googleMap, boolean isEnabled) {
+        if(ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            googleMap.setMyLocationEnabled(isEnabled);
+        }
+    }
+
+    @Override
+    public void runOnUIThread() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    Thread.sleep(500);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }finally {
+                    TaskActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            presenter.saveSnapshot();
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK){
             Place place = PlacePicker.getPlace(this, data);
             presenter.updatePlace(place);

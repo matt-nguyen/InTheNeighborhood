@@ -4,38 +4,39 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.support.v4.content.ContextCompat;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.Toast;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.nghianguyen.intheneighborhood.core.MapsService;
+import com.nghianguyen.intheneighborhood.core.ThreadsService;
 import com.nghianguyen.intheneighborhood.data.Task;
 
-public abstract class TaskPresenter implements TaskContact.Presenter{
+public class TaskPresenter implements TaskContact.Presenter{
 
     private final Task task;
     private final TaskContact.View view;
     private final TaskModel model;
     private GoogleMap map;
-    private TaskActivity activity;
+    private ThreadsService threadsService;
+    private MapsService mapsService;
 
-    public TaskPresenter(TaskContact.View view, final TaskModel model, TaskActivity activity){
+    public TaskPresenter(TaskContact.View view, final TaskModel model, TaskActivity activity,
+                         ThreadsService threadsService, MapsService mapsService){
         this.view = view;
         this.task = model.task();
         this.model = model;
-        this.activity = activity;
+        this.threadsService = threadsService;
+        this.mapsService = mapsService;
 
         view.setPresenter(this);
 
         view.displayDescription(task.getDescription());
         view.showLocationName(task.getLocName());
+        view.showTaskDone(task.isDone());
     }
 
     @Override
@@ -46,29 +47,13 @@ public abstract class TaskPresenter implements TaskContact.Presenter{
     }
 
     @Override
-    public void setDone(boolean isDone) {
+    public void markDoneStatus(boolean isDone) {
         model.toggleDone(isDone);
     }
 
-    public void updatePlace(Place place){
-        if(place != null){
-            String placeName = place.getName().toString();
-            LatLng latLng = place.getLatLng();
 
-            view.showLocationName(placeName);
-
-            model.setLocation(place);
-
-            map.clear();
-            map.addMarker(new MarkerOptions().position(latLng).title(placeName));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-
-            saveSnapshot();
-        }
-    }
-
-
-    public void initMap(GoogleMap googleMap, Location currentLocation){
+    @Override
+    public void initializeMap(GoogleMap googleMap, Location currentLocation){
         this.map = googleMap;
 
         float zoom = 13;
@@ -89,58 +74,61 @@ public abstract class TaskPresenter implements TaskContact.Presenter{
 
     }
 
-    public void finish(){
-        model.saveTask();
+    @Override
+    public void pickPlace() {
+        mapsService.pickPlace();
     }
 
-    private void saveSnapshot(){
+    @Override
+    public void updatePlace(Place place){
+        if(place != null){
+            String placeName = place.getName().toString();
+            LatLng latLng = place.getLatLng();
 
-        setMyLocationEnabled(false);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    Thread.sleep(500);
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }finally {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            map.snapshot(new GoogleMap.SnapshotReadyCallback() {
-                                @Override
-                                public void onSnapshotReady(Bitmap bitmap) {
-                                    if(bitmap != null) {
-                                        // Determine start of Y for cropping
-                                        int height = bitmap.getHeight();
-                                        int newHeight = (int) (height * 0.3);
-                                        int startY = (height - newHeight) / 2;
+            view.showLocationName(placeName);
 
-                                        model.setLocMapImage(
-                                                Bitmap.createBitmap(bitmap, 0, startY,
-                                                        bitmap.getWidth(), newHeight)
-                                        );
+            model.setLocation(place);
 
-                                        // display the current indicator after snapshot
-                                        setMyLocationEnabled(true);
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            }
-        }).start();
+            map.clear();
+            map.addMarker(new MarkerOptions().position(latLng).title(placeName));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
 
-    }
-
-
-    private void setMyLocationEnabled(boolean enabled){
-        if(ContextCompat.checkSelfPermission(activity.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            map.setMyLocationEnabled(enabled);
+            startSavingSnapshot();
         }
     }
 
-    public abstract void pickPlace();
+    private void startSavingSnapshot(){
+        mapsService.setMyLocationEnabled(map, false);
+        threadsService.runOnUIThread();
+    }
+
+
+    @Override
+    public void saveSnapshot() {
+        map.snapshot(new GoogleMap.SnapshotReadyCallback() {
+            @Override
+            public void onSnapshotReady(Bitmap bitmap) {
+                if(bitmap != null) {
+                    // Determine start of Y for cropping
+                    int height = bitmap.getHeight();
+                    int newHeight = (int) (height * 0.3);
+                    int startY = (height - newHeight) / 2;
+
+                    model.setLocMapImage(
+                            Bitmap.createBitmap(bitmap, 0, startY,
+                                    bitmap.getWidth(), newHeight)
+                    );
+
+                    // display the current indicator after snapshot
+                    mapsService.setMyLocationEnabled(map, true);
+                }
+            }
+        });
+    }
+
+
+    @Override
+    public void finish(){
+        model.saveTask();
+    }
 }
