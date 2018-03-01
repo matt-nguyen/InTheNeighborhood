@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
 import com.nghianguyen.intheneighborhood.data.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
@@ -43,19 +44,29 @@ public class TaskModel {
         task.setDescription(description);
     }
 
-    public void setLocName(String locName){
-        task.setLocName(locName);
+    public void setLocation(Place place){
+        task.setLocName(place.getName().toString());
+        task.setLocAddress(place.getAddress().toString());
+        task.setLocLatLng(place.getLatLng());
     }
 
-    public void setLocAddr(String locAddr){
-        task.setLocAddress(locAddr);
-    }
-
-    public void setLocLatLng(LatLng locLatLng){
-        task.setLocLatLng(locLatLng);
-    }
+//    public void setLocName(String locName){
+//        task.setLocName(locName);
+//    }
+//
+//    public void setLocAddr(String locAddr){
+//        task.setLocAddress(locAddr);
+//    }
+//
+//    public void setLocLatLng(LatLng locLatLng){
+//        task.setLocLatLng(locLatLng);
+//    }
 
     public void setLocMapImage(Bitmap locMapImage){
         task.setLocMapImage(locMapImage);
+    }
+
+    public void toggleDone(boolean isDone){
+        task.setDone(isDone);
     }
 }

@@ -19,6 +19,7 @@ public class Task {
     private LatLng locLatLng;
     private Bitmap locMapImage;
     private boolean isNearby = false;
+    private boolean isDone = false;
 
     public Task(){
         this(null, null);
@@ -30,12 +31,14 @@ public class Task {
         this.locName = locName;
     }
 
-    public Task(int db_id, String description, String locName, String locAddress, double lat, double lng, Bitmap locMapImage){
+    public Task(int db_id, String description, String locName, String locAddress, double lat,
+                double lng, Bitmap locMapImage, boolean isDone){
         this.db_id = db_id;
         this.description = description;
         this.locName = locName;
         this.locAddress = locAddress;
         this.locMapImage = locMapImage;
+        this.isDone = isDone;
 
         if(locAddress != null && locAddress.length() > 0){
             this.locLatLng = new LatLng(lat, lng);
@@ -134,6 +137,14 @@ public class Task {
 
     public void setNearby(boolean nearby) {
         isNearby = nearby;
+    }
+
+    public boolean isDone() {
+        return isDone;
+    }
+
+    public void setDone(boolean done) {
+        isDone = done;
     }
 
     @Override

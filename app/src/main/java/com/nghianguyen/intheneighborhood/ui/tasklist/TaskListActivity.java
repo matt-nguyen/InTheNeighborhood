@@ -11,10 +11,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -44,20 +46,31 @@ public class TaskListActivity extends GoogleApiConnectActivity {
 
     private BroadcastReceiver receiver;
 
+    private TaskListView view;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
 
-        TaskListView view = findViewById(R.id.content);
+        view = findViewById(R.id.content);
+        view.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(TaskListActivity.this, TaskActivity.class));
+            }
+        });
 
         mTasks = getTasks();
-        mAdapter = new TaskAdapter(this, mTasks);
+        ContextMenuRecyclerView recyclerView = view.taskList;
 
-        RecyclerView recyclerView = view.taskList;
+        mAdapter = new TaskAdapter(this, mTasks, recyclerView);
+
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        registerForContextMenu(recyclerView);
 
         receiver = new BroadcastReceiver() {
             @Override
@@ -112,7 +125,6 @@ public class TaskListActivity extends GoogleApiConnectActivity {
 
         switch (item.getItemId()){
             case R.id.action_new_task:
-                // Add new blank Task to the singleton
                 startActivity(new Intent(this, TaskActivity.class));
                 return true;
             case R.id.action_clear_all_tasks:
@@ -132,11 +144,45 @@ public class TaskListActivity extends GoogleApiConnectActivity {
     }
 
     @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        int itemIndex = ((ContextMenuRecyclerView.RecyclerViewContextMenuInfo) menuInfo).position;
+
+        Task task = ((TaskAdapter) view.taskList.getAdapter()).getTask(itemIndex);
+        itemPos = itemIndex;
+        if(task.isDone()) {
+            menu.add(Menu.NONE, R.id.context_menu_mark_not_done, Menu.NONE,
+                    R.string.context_menu_mark_not_done);
+        }else{
+            menu.add(Menu.NONE, R.id.context_menu_mark_done, Menu.NONE,
+                    R.string.context_menu_mark_done);
+        }
+
+//        Toast.makeText(this, "item selected - " + itemIndex, Toast.LENGTH_SHORT).show();
+    }
+
+    private int itemPos = -1;
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.context_menu_mark_not_done:
+                Toast.makeText(this, "marking not done - " + itemPos, Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.context_menu_mark_done:
+                Toast.makeText(this, "marking done - " + itemPos, Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
-            // TODO: Refactor?
             new ProximityAlertManager(this).updateAllProximityAlerts(getTasks());
         }
     }

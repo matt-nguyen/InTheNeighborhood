@@ -19,7 +19,7 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
     public static final String DB_UPDATED = "com.nghianguyen.intheneighborhood.TaskOpenHelper.DB_UPDATED";
 
     private static final String DATABASE_NAME = "tasks";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public static final String TASK_TABLE_NAME = "tasks";
     public static final String FIELD_TASK_ID = "task_id";
@@ -29,6 +29,7 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
     public static final String FIELD_LOC_LAT = "loc_lat";
     public static final String FIELD_LOC_LNG = "loc_lng";
     public static final String FIELD_LOC_MAP_IMAGE = "loc_map_image";
+    public static final String FIELD_IS_DONE = "is_done";
 
     private static final String TASK_TABLE_CREATE =
             "CREATE TABLE " + TASK_TABLE_NAME + " (" +
@@ -38,7 +39,8 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
                     FIELD_LOC_ADDR + " TEXT, " +
                     FIELD_LOC_LAT + " REAL, " +
                     FIELD_LOC_LNG + " REAL, " +
-                    FIELD_LOC_MAP_IMAGE + " BLOB " +
+                    FIELD_LOC_MAP_IMAGE + " BLOB, " +
+                    FIELD_IS_DONE + " INTEGER " +
                     ");";
 
     private static final String TASK_TABLE_DELETE =
@@ -64,6 +66,10 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<Task> getTasks(){
+        return getTasks(FIELD_IS_DONE + " ASC");
+    }
+
+    public ArrayList<Task> getTasks(String orderBy){
 
         ArrayList<Task> tasks = new ArrayList<>();
 
@@ -74,7 +80,8 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
                 FIELD_LOC_ADDR,
                 FIELD_LOC_LAT,
                 FIELD_LOC_LNG,
-                FIELD_LOC_MAP_IMAGE
+                FIELD_LOC_MAP_IMAGE,
+                FIELD_IS_DONE
         };
 
         Cursor cursor = getReadableDatabase().query(
@@ -84,14 +91,15 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
                 null,
                 null,
                 null,
-                null
+                orderBy
         );
 
-        int rowId;
+        int rowId, isDoneInt;
         String description, locName, locAddr;
         double lat, lng;
         byte[] blob;
         Bitmap locMapImage;
+        boolean isDone;
         while(cursor.moveToNext()){
             try {
                 rowId = cursor.getInt(cursor.getColumnIndex(FIELD_TASK_ID));
@@ -107,8 +115,12 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
                 }else{
                     locMapImage = null;
                 }
+
+                isDoneInt = cursor.getInt(cursor.getColumnIndex(FIELD_IS_DONE));
+                isDone = isDoneInt == 1;
+
                 tasks.add(
-                        new Task(rowId, description, locName, locAddr, lat, lng, locMapImage)
+                        new Task(rowId, description, locName, locAddr, lat, lng, locMapImage, isDone)
                 );
             }catch (Exception ex){
                 ex.printStackTrace();
@@ -132,7 +144,8 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
                 FIELD_LOC_ADDR,
                 FIELD_LOC_LAT,
                 FIELD_LOC_LNG,
-                FIELD_LOC_MAP_IMAGE
+                FIELD_LOC_MAP_IMAGE,
+                FIELD_IS_DONE
         };
 
         Cursor cursor = getReadableDatabase().query(
@@ -145,11 +158,12 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
                 null
         );
 
-        int rowId;
+        int rowId, isDoneInt;
         String description, locName, locAddr;
         double lat, lng;
         byte[] blob;
         Bitmap locMapImage;
+        boolean isDone;
         while(cursor.moveToNext()){
             try {
                 rowId = cursor.getInt(cursor.getColumnIndex(FIELD_TASK_ID));
@@ -166,7 +180,10 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
                     locMapImage = null;
                 }
 
-                task = new Task(rowId, description, locName, locAddr, lat, lng, locMapImage);
+                isDoneInt = cursor.getInt(cursor.getColumnIndex(FIELD_IS_DONE));
+                isDone = isDoneInt == 1;
+
+                task = new Task(rowId, description, locName, locAddr, lat, lng, locMapImage, isDone);
             }catch (Exception ex){
                 ex.printStackTrace();
             }finally {
@@ -184,23 +201,7 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
     }
 
     public long addTask(Task t){
-        ContentValues cv = new ContentValues();
-        cv.put(FIELD_DESCRIPTION, t.getDescription());
-        cv.put(FIELD_LOC_NAME, t.getLocName());
-        cv.put(FIELD_LOC_ADDR, t.getLocAddress());
-
-        LatLng locLatLng = t.getLocLatLng();
-        if(locLatLng != null) {
-            cv.put(FIELD_LOC_LAT, locLatLng.latitude);
-            cv.put(FIELD_LOC_LNG, locLatLng.longitude);
-        }
-
-        Bitmap locMapImage = t.getLocMapImage();
-        if(locMapImage != null){
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            locMapImage.compress(Bitmap.CompressFormat.PNG, 0, os);
-            cv.put(FIELD_LOC_MAP_IMAGE, os.toByteArray());
-        }
+        ContentValues cv = buildContentValues(t);
 
         Log.d("TESTING", "inserting - " + cv.toString());
         long id = getWritableDatabase().insert(TASK_TABLE_NAME, null, cv);
@@ -214,23 +215,7 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
     }
 
     public long updateTask(Task t){
-        ContentValues cv = new ContentValues();
-        cv.put(FIELD_DESCRIPTION, t.getDescription());
-        cv.put(FIELD_LOC_NAME, t.getLocName());
-        cv.put(FIELD_LOC_ADDR, t.getLocAddress());
-
-        LatLng locLatLng = t.getLocLatLng();
-        if(locLatLng != null) {
-            cv.put(FIELD_LOC_LAT, locLatLng.latitude);
-            cv.put(FIELD_LOC_LNG, locLatLng.longitude);
-        }
-
-        Bitmap locMapImage = t.getLocMapImage();
-        if(locMapImage != null){
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            locMapImage.compress(Bitmap.CompressFormat.PNG, 0, os);
-            cv.put(FIELD_LOC_MAP_IMAGE, os.toByteArray());
-        }
+        ContentValues cv = buildContentValues(t);
 
         Log.d("TESTING", "updating - " + cv.toString());
         long id = getWritableDatabase().update(
@@ -255,5 +240,28 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
     public void notifyUpdate(){
         Intent intent = new Intent(DB_UPDATED);
         context.sendBroadcast(intent);
+    }
+
+    public ContentValues buildContentValues(Task t){
+        ContentValues cv = new ContentValues();
+        cv.put(FIELD_DESCRIPTION, t.getDescription());
+        cv.put(FIELD_LOC_NAME, t.getLocName());
+        cv.put(FIELD_LOC_ADDR, t.getLocAddress());
+        cv.put(FIELD_IS_DONE, t.isDone());
+
+        LatLng locLatLng = t.getLocLatLng();
+        if(locLatLng != null) {
+            cv.put(FIELD_LOC_LAT, locLatLng.latitude);
+            cv.put(FIELD_LOC_LNG, locLatLng.longitude);
+        }
+
+        Bitmap locMapImage = t.getLocMapImage();
+        if(locMapImage != null){
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            locMapImage.compress(Bitmap.CompressFormat.PNG, 0, os);
+            cv.put(FIELD_LOC_MAP_IMAGE, os.toByteArray());
+        }
+
+        return cv;
     }
 }

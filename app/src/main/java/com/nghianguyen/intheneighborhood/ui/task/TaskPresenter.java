@@ -5,8 +5,10 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.google.android.gms.location.places.Place;
@@ -16,49 +18,36 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.nghianguyen.intheneighborhood.data.Task;
 
-public abstract class TaskPresenter {
+public abstract class TaskPresenter implements TaskContact.Presenter{
 
     private final Task task;
-    private final TaskView view;
+    private final TaskContact.View view;
     private final TaskModel model;
     private GoogleMap map;
     private TaskActivity activity;
 
-    public TaskPresenter(TaskView view, final TaskModel model, TaskActivity activity){
+    public TaskPresenter(TaskContact.View view, final TaskModel model, TaskActivity activity){
         this.view = view;
         this.task = model.task();
         this.model = model;
         this.activity = activity;
 
-        view.descriptionEditText.setText(task.getDescription());
+        view.setPresenter(this);
 
-        if(task.getLocName() != null){
-            view.selectPlaceButton.setText(task.getLocName());
+        view.displayDescription(task.getDescription());
+        view.showLocationName(task.getLocName());
+    }
+
+    @Override
+    public void setDescription(String description) {
+        if(!TextUtils.isEmpty(description)) {
+            model.setDescription(description);
         }
+    }
 
-        view.descriptionEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                model.setDescription((editable != null) ? editable.toString() : null);
-            }
-        });
-
-        view.selectPlaceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                pickPlace();
-            }
-        });
+    @Override
+    public void setDone(boolean isDone) {
+        model.toggleDone(isDone);
     }
 
     public void updatePlace(Place place){
@@ -66,14 +55,13 @@ public abstract class TaskPresenter {
             String placeName = place.getName().toString();
             LatLng latLng = place.getLatLng();
 
-            view.selectPlaceButton.setText(placeName);
+            view.showLocationName(placeName);
+
+            model.setLocation(place);
+
             map.clear();
             map.addMarker(new MarkerOptions().position(latLng).title(placeName));
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-
-            model.setLocName(placeName);
-            model.setLocAddr(place.getAddress().toString());
-            model.setLocLatLng(latLng);
 
             saveSnapshot();
         }
@@ -144,14 +132,11 @@ public abstract class TaskPresenter {
             }
         }).start();
 
-
-
-
     }
 
 
     private void setMyLocationEnabled(boolean enabled){
-        if(ContextCompat.checkSelfPermission(view.descriptionEditText.getContext(),
+        if(ContextCompat.checkSelfPermission(activity.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(enabled);
         }
