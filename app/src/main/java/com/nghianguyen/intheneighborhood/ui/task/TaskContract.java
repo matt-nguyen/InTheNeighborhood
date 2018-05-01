@@ -5,7 +5,7 @@ import android.location.Location;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.GoogleMap;
 
-public interface TaskContact {
+public interface TaskContract {
 
     interface View{
         void setPresenter(Presenter presenter);

@@ -11,7 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.nghianguyen.intheneighborhood.data.Task;
+import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.util.ArrayList;
 

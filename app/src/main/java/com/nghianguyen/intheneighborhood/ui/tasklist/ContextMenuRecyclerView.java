@@ -7,10 +7,6 @@ import android.util.AttributeSet;
 import android.view.ContextMenu;
 import android.view.View;
 
-/**
- * Created by unlim on 11/3/2017.
- */
-
 public class ContextMenuRecyclerView extends RecyclerView {
 
     private RecyclerViewContextMenuInfo mContextMenuInfo;

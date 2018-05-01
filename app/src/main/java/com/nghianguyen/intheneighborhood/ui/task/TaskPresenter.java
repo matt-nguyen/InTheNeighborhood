@@ -1,9 +1,7 @@
 package com.nghianguyen.intheneighborhood.ui.task;
 
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
 import com.google.android.gms.location.places.Place;
@@ -12,24 +10,21 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.nghianguyen.intheneighborhood.core.MapsService;
-import com.nghianguyen.intheneighborhood.core.ThreadsService;
-import com.nghianguyen.intheneighborhood.data.Task;
+import com.nghianguyen.intheneighborhood.data.model.Task;
 
-public class TaskPresenter implements TaskContact.Presenter{
+public abstract class TaskPresenter implements TaskContract.Presenter{
 
-    private final Task task;
-    private final TaskContact.View view;
-    private final TaskModel model;
+    private Task task;
+    private TaskContract.View view;
+    private TaskModel model;
     private GoogleMap map;
-    private ThreadsService threadsService;
     private MapsService mapsService;
 
-    public TaskPresenter(TaskContact.View view, final TaskModel model, TaskActivity activity,
-                         ThreadsService threadsService, MapsService mapsService){
+    public TaskPresenter(TaskContract.View view, TaskModel model,
+                         MapsService mapsService){
         this.view = view;
         this.task = model.task();
         this.model = model;
-        this.threadsService = threadsService;
         this.mapsService = mapsService;
 
         view.setPresenter(this);
@@ -99,7 +94,7 @@ public class TaskPresenter implements TaskContact.Presenter{
 
     private void startSavingSnapshot(){
         mapsService.setMyLocationEnabled(map, false);
-        threadsService.runOnUIThread();
+        beginSavingSnapshot();
     }
 
 
@@ -130,5 +125,9 @@ public class TaskPresenter implements TaskContact.Presenter{
     @Override
     public void finish(){
         model.saveTask();
+        view = null;
+        mapsService = null;
     }
+
+    abstract void beginSavingSnapshot();
 }

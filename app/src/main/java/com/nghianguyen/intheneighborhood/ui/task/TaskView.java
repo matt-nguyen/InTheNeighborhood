@@ -12,13 +12,13 @@ import android.widget.EditText;
 
 import com.nghianguyen.intheneighborhood.R;
 
-public class TaskView implements TaskContact.View{
+public class TaskView implements TaskContract.View{
 
     public EditText descriptionEditText;
     public Button selectPlaceButton;
     public CheckBox isDoneCheckbox;
 
-    private TaskContact.Presenter presenter;
+    private TaskContract.Presenter presenter;
 
     public TaskView(Activity activity){
         descriptionEditText = activity.findViewById(R.id.descriptionEditText);
@@ -28,7 +28,7 @@ public class TaskView implements TaskContact.View{
     }
 
     @Override
-    public void setPresenter(TaskContact.Presenter presenter) {
+    public void setPresenter(TaskContract.Presenter presenter) {
         this.presenter = presenter;
 
         if(presenter != null){

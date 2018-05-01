@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,17 +26,23 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
-import com.nghianguyen.intheneighborhood.data.Task;
+import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.TaskOpenHelper;
 import com.nghianguyen.intheneighborhood.map.GoogleApiConnectActivity;
 import com.nghianguyen.intheneighborhood.settings.SettingsActivity;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
+import java.util.List;
 
-public class TaskListActivity extends GoogleApiConnectActivity {
+public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View{
+
+    @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
+    @BindView(R.id.fab) public FloatingActionButton fab;
 
     private TaskAdapter mAdapter;
     private ArrayList<Task> mTasks;
@@ -46,29 +53,32 @@ public class TaskListActivity extends GoogleApiConnectActivity {
 
     private BroadcastReceiver receiver;
 
-    private TaskListView view;
+    private TaskListContract.Presenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        view = findViewById(R.id.content);
-        view.fab.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(TaskListActivity.this, TaskActivity.class));
             }
         });
 
+        TaskListModel model = new TaskListModel(TaskDbManager.get(this));
+        presenter = new TaskListPresenter(this, model);
+
         mTasks = getTasks();
-        ContextMenuRecyclerView recyclerView = view.taskList;
+        ContextMenuRecyclerView recyclerView = taskList;
 
         mAdapter = new TaskAdapter(this, mTasks, recyclerView);
 
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        taskList.setAdapter(mAdapter);
+        taskList.setLayoutManager(new LinearLayoutManager(this));
 
         registerForContextMenu(recyclerView);
 
@@ -114,6 +124,12 @@ public class TaskListActivity extends GoogleApiConnectActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        presenter.finish();
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -149,7 +165,7 @@ public class TaskListActivity extends GoogleApiConnectActivity {
 
         int itemIndex = ((ContextMenuRecyclerView.RecyclerViewContextMenuInfo) menuInfo).position;
 
-        Task task = ((TaskAdapter) view.taskList.getAdapter()).getTask(itemIndex);
+        Task task = ((TaskAdapter) taskList.getAdapter()).getTask(itemIndex);
         itemPos = itemIndex;
         if(task.isDone()) {
             menu.add(Menu.NONE, R.id.context_menu_mark_not_done, Menu.NONE,
@@ -159,7 +175,6 @@ public class TaskListActivity extends GoogleApiConnectActivity {
                     R.string.context_menu_mark_done);
         }
 
-//        Toast.makeText(this, "item selected - " + itemIndex, Toast.LENGTH_SHORT).show();
     }
 
     private int itemPos = -1;
@@ -195,6 +210,11 @@ public class TaskListActivity extends GoogleApiConnectActivity {
                 Log.d("onRequestPermissionsRe", "ACCESS_FINE_LOCATION access granted");
             }
         }
+    }
+
+    @Override
+    public void showTasks(List<Task> tasks) {
+
     }
 
     private void startLocationUpdates(){

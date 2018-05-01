@@ -8,9 +8,7 @@ import android.location.Location;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -18,7 +16,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.nghianguyen.intheneighborhood.R;
-import com.nghianguyen.intheneighborhood.data.Task;
+import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
 
 import java.util.ArrayList;
@@ -59,9 +57,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
         return new ViewHolder(taskView);
     }
 
-    /**************************************************************
-     *  Where we populate data from the task onto the ViewHolder
-     **************************************************************/
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
 

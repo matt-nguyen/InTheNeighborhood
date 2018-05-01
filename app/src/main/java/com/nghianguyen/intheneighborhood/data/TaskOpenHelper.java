@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;

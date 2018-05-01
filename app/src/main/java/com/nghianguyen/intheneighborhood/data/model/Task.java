@@ -1,4 +1,4 @@
-package com.nghianguyen.intheneighborhood.data;
+package com.nghianguyen.intheneighborhood.data.model;
 
 import android.graphics.Bitmap;
 import android.util.Log;

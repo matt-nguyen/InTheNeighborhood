@@ -17,25 +17,21 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.core.MapsService;
-import com.nghianguyen.intheneighborhood.core.ThreadsService;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.map.GoogleApiConnectActivity;
 import com.nghianguyen.intheneighborhood.map.GoogleServiceManager;
 
-public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback, ThreadsService, MapsService {
+public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback, MapsService {
 
     public static final String EXTRA_TASK_ID =
             "com.nghianguyen.intheneighborhood.task_id";
 
-    private TaskView taskView;
-    private TaskContact.Presenter presenter;
+    private TaskContract.Presenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
-
-        taskView = new TaskView(this);
 
         Intent intent = getIntent();
         int taskId = -1;
@@ -43,8 +39,16 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
         }
 
+        TaskContract.View taskView = new TaskView(this);
+
         TaskModel model = new TaskModel(TaskDbManager.get(this), taskId);
-        presenter = new TaskPresenter(taskView, model, this, this, this);
+
+        presenter = new TaskPresenter(taskView, model, this){
+            @Override
+            void beginSavingSnapshot() {
+                TaskActivity.this.beginSavingSnapshot();
+            }
+        };
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -92,8 +96,16 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         }
     }
 
+
     @Override
-    public void runOnUIThread() {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == Activity.RESULT_OK){
+            Place place = PlacePicker.getPlace(this, data);
+            presenter.updatePlace(place);
+        }
+    }
+
+    private void beginSavingSnapshot(){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -111,14 +123,6 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
                 }
             }
         }).start();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode == Activity.RESULT_OK){
-            Place place = PlacePicker.getPlace(this, data);
-            presenter.updatePlace(place);
-        }
     }
 
 }

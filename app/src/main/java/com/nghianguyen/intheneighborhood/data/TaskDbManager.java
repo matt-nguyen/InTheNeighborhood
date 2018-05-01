@@ -3,6 +3,7 @@ package com.nghianguyen.intheneighborhood.data;
 import android.content.Context;
 
 import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
+import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.util.ArrayList;
 
