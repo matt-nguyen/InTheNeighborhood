@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.nghianguyen.intheneighborhood.data.model.Task;
@@ -17,15 +18,25 @@ import java.util.ArrayList;
 
 public class ProximityAlertManager {
 
+    private static ProximityAlertManager proximityAlertManager;
+
     public static final String ACTION_PROXIMITY_ALERT =
             "com.nghianguyen.intheneighborhood.PROXIMITY_ALERT";
 
     private LocationManager locationManager;
     private Context context;
 
-    public ProximityAlertManager(Context context){
+    private ProximityAlertManager(Context context){
         this.locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
         this.context = context;
+    }
+
+    public static ProximityAlertManager get(Context context){
+        if(proximityAlertManager == null){
+            proximityAlertManager = new ProximityAlertManager(context.getApplicationContext());
+        }
+
+        return proximityAlertManager;
     }
 
     public void updateAllProximityAlerts(ArrayList<Task> tasks){

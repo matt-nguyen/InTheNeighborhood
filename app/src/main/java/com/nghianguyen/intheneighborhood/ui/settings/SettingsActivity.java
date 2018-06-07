@@ -1,4 +1,4 @@
-package com.nghianguyen.intheneighborhood.settings;
+package com.nghianguyen.intheneighborhood.ui.settings;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;

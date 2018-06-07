@@ -48,7 +48,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity" />
         </activity>
-        <activity android:name="com.nghianguyen.intheneighborhood.settings.SettingsActivity"
+        <activity android:name="com.nghianguyen.intheneighborhood.ui.settings.SettingsActivity"
             android:label="Settings"
             android:screenOrientation="portrait">
             <meta-data

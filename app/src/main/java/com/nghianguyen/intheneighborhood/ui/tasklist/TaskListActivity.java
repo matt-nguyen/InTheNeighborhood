@@ -30,13 +30,12 @@ import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.TaskOpenHelper;
 import com.nghianguyen.intheneighborhood.map.GoogleApiConnectActivity;
-import com.nghianguyen.intheneighborhood.settings.SettingsActivity;
+import com.nghianguyen.intheneighborhood.ui.settings.SettingsActivity;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View{
@@ -45,11 +44,6 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
     @BindView(R.id.fab) public FloatingActionButton fab;
 
     private TaskAdapter mAdapter;
-    private ArrayList<Task> mTasks;
-
-    private FusedLocationProviderClient fusedLocationProviderClient;
-    private LocationRequest locationRequest;
-    private LocationCallback locationCallback;
 
     private BroadcastReceiver receiver;
 
@@ -69,36 +63,27 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             }
         });
 
-        TaskListModel model = new TaskListModel(TaskDbManager.get(this));
-        presenter = new TaskListPresenter(this, model);
+        TaskListModel model = new TaskListModel(TaskDbManager.get(this), new FusedLocationProviderClient(this));
 
-        mTasks = getTasks();
-        ContextMenuRecyclerView recyclerView = taskList;
+        presenter = new TaskListPresenter(this, model){
+            @Override
+            void startLocationUpdates(FusedLocationProviderClient fusedLocationProviderClient,
+                                      LocationRequest locationRequest, LocationCallback locationCallback) {
+                TaskListActivity.this.startLocationUpdates(fusedLocationProviderClient, locationRequest,
+                        locationCallback);
+            }
+        };
 
-        mAdapter = new TaskAdapter(this, mTasks, recyclerView);
-
-        taskList.setAdapter(mAdapter);
         taskList.setLayoutManager(new LinearLayoutManager(this));
 
-        registerForContextMenu(recyclerView);
+        registerForContextMenu(taskList);
 
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mTasks = getTasks();
-                mAdapter.refresh(mTasks);
-            }
-        };
-
-        fusedLocationProviderClient = new FusedLocationProviderClient(this);
-        locationRequest = new LocationRequest()
-                .setInterval(10 * 1000)
-                .setFastestInterval(5 * 1000)
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationCallback = new LocationCallback(){
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                mAdapter.updateNearbyTasks(locationResult.getLastLocation());
+                if(presenter != null){
+                    presenter.refreshTasks();
+                }
             }
         };
 
@@ -109,17 +94,19 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         }
     }
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter(TaskOpenHelper.DB_UPDATED));
-        startLocationUpdates();
+        presenter.onAttach();
     }
 
     @Override
     protected void onPause() {
         unregisterReceiver(receiver);
-        stopLocationUpdates();
+        presenter.onDetach();
         super.onPause();
     }
 
@@ -131,7 +118,6 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -156,7 +142,6 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             default:
                 return super.onOptionsItemSelected(item);
         }
-
     }
 
     @Override
@@ -198,14 +183,13 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
-            new ProximityAlertManager(this).updateAllProximityAlerts(getTasks());
+            presenter.updateProximityAlerts(ProximityAlertManager.get(this));
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(grantResults.length > 0){
-
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 Log.d("onRequestPermissionsRe", "ACCESS_FINE_LOCATION access granted");
             }
@@ -214,21 +198,32 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
     @Override
     public void showTasks(List<Task> tasks) {
+        mAdapter = new TaskAdapter(this, tasks, taskList);
 
+        taskList.setAdapter(mAdapter);
     }
 
-    private void startLocationUpdates(){
+    @Override
+    public void updateLocation(LocationResult locationResult) {
+        if(mAdapter != null){
+            mAdapter.updateNearbyTasks(locationResult.getLastLocation());
+        }
+    }
+
+    @Override
+    public void updateAdapter(List<Task> tasks) {
+        if(mAdapter != null){
+            mAdapter.refresh(tasks);
+        }
+    }
+
+    private void startLocationUpdates(FusedLocationProviderClient fusedLocationProviderClient,
+                                      LocationRequest locationRequest, LocationCallback locationCallback){
+
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED){
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
         }
-    }
 
-    private void stopLocationUpdates(){
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-    }
-
-    private ArrayList<Task> getTasks(){
-        return TaskDbManager.get(this).getTasks();
     }
 }
