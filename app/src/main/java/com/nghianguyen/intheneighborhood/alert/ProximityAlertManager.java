@@ -51,60 +51,27 @@ public class ProximityAlertManager {
 
     }
 
-    public void addProximityAlert(Task t, long id){
-        LatLng locLatLng = t.getLocLatLng();
-        if(id > -1 && locLatLng != null){
-            if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-
-                Intent i = new Intent(ACTION_PROXIMITY_ALERT);
-                i.putExtra(AlertReceiver.EXTRA_TASK_ID, t.getDb_id());
-                i.putExtra(AlertReceiver.EXTRA_TASK_DESC, t.getDescription());
-
-                PendingIntent pi = PendingIntent.getBroadcast(context, (int) id, i, 0);
-
-                locationManager.removeProximityAlert(pi);
-
-                locationManager.addProximityAlert(
-                        locLatLng.latitude,
-                        locLatLng.longitude,
-                        getProximityDistance(),
-                        -1,
-                        pi
-                );
-            }
+    public void addProximityAlert(Task task, long id){
+        if(id > -1){
+            addTaskProximityAlert(task);
         }
     }
 
     public void addAllProximityAlerts(ArrayList<Task> tasks){
-        Log.d("TESTING", "adding all proximity alerts");
-        Log.d("TESTING", "proximity distance - " + getProximityDistance());
+        for (Task task : tasks) {
+                addTaskProximityAlert(task);
+        }
+    }
+
+    public void removeAllProximityAlerts(ArrayList<Task> tasks){
         if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
-            Intent i;
-            PendingIntent pi;
-            LatLng locLatLng;
+            Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
             for (Task task : tasks) {
-                locLatLng = task.getLocLatLng();
-
-                if(locLatLng != null) {
-                    i = new Intent(ACTION_PROXIMITY_ALERT);
-                    i.putExtra(AlertReceiver.EXTRA_TASK_ID, task.getDb_id());
-                    i.putExtra(AlertReceiver.EXTRA_TASK_DESC, task.getDescription());
-
-                    pi = PendingIntent.getBroadcast(context, task.getDb_id(), i, 0);
-
-                    locationManager.removeProximityAlert(pi);
-
-                    locationManager.addProximityAlert(
-                            locLatLng.latitude,
-                            locLatLng.longitude,
-                            getProximityDistance(),
-                            -1,
-                            pi
-                    );
-                }
+                locationManager.removeProximityAlert(
+                        PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0)
+                );
             }
         }
     }
@@ -124,19 +91,32 @@ public class ProximityAlertManager {
         }
     }
 
-    public void removeAllProximityAlerts(ArrayList<Task> tasks){
-        Log.d("TESTING", "removing all proximity alerts");
+    private void addTaskProximityAlert(Task task){
         if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
-            Intent i = new Intent(ACTION_PROXIMITY_ALERT);
-            for (Task task : tasks) {
-                locationManager.removeProximityAlert(
-                        PendingIntent.getBroadcast(context, task.getDb_id(), i, 0)
-                );
+            if(task.getLocLatLng() != null) {
+                PendingIntent pendingIntent = buildPendingIntent(task);
 
+                locationManager.removeProximityAlert(pendingIntent);
+
+                locationManager.addProximityAlert(
+                        task.getLocLatLng().latitude,
+                        task.getLocLatLng().longitude,
+                        getProximityDistance(),
+                        -1,
+                        pendingIntent
+                );
             }
         }
+    }
+
+    private PendingIntent buildPendingIntent(Task task){
+        Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
+        intent.putExtra(AlertReceiver.EXTRA_TASK_ID, task.getDb_id());
+        intent.putExtra(AlertReceiver.EXTRA_TASK_DESC, task.getDescription());
+
+        return PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0);
     }
 
     private float getProximityDistance(){
