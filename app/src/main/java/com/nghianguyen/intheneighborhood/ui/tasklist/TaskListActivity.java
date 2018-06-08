@@ -1,15 +1,21 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
@@ -37,6 +43,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
 import java.util.List;
+
+import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View{
 
@@ -93,8 +101,6 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
     }
-
-
 
     @Override
     protected void onResume() {

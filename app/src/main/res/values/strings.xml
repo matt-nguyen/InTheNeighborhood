@@ -15,4 +15,7 @@
 
     <string name="content_select_place">Select Place</string>
     <string name="content_entered_location">You are within a location</string>
+
+    <string name="notification_channel_name">Nearby Alerts</string>
+    <string name="notification_channel_description">Get an alert when you are nearby a task</string>
 </resources>
