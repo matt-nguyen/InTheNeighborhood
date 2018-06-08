@@ -13,6 +13,8 @@ import android.util.Log;
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
 
+import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
+
 public class AlertReceiver extends BroadcastReceiver {
 
     public static final String EXTRA_TASK_ID = "com.nghianguyen.intheneighborhood.task_id";
@@ -24,33 +26,35 @@ public class AlertReceiver extends BroadcastReceiver {
         boolean isEntering = intent.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false);
         Log.d("onReceive", "isEntering - " + isEntering);
 
-        // Send notification that device is within proximity of a task location
         if(isEntering){
-
-            // Build intent to go to the task on click of notification
-            Intent i = new Intent(context, TaskActivity.class);
-
-            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
-            i.putExtra(TaskActivity.EXTRA_TASK_ID, taskId);
-
-            PendingIntent pi = PendingIntent.getActivity(context, 0, i, 0);
-
             String taskDescription = intent.getStringExtra(EXTRA_TASK_DESC);
 
-            Notification notification = new NotificationCompat.Builder(context)
-                    .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                    .setContentTitle(context.getString(R.string.notification_title))
-                    .setContentText(taskDescription)
-                    .setContentIntent(pi)
-                    .setAutoCancel(true)
-                    .build();
+            Intent taskIntent = new Intent(context, TaskActivity.class);
 
-            NotificationManager notificationManager =
-                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
+            taskIntent.putExtra(TaskActivity.EXTRA_TASK_ID, taskId);
 
-            Log.d("onReceive", "Sending notification");
-            notificationManager.notify(0, notification);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, taskIntent, 0);
 
+            showNotification(context, taskDescription, pendingIntent);
         }
+    }
+
+    private void showNotification(Context context, String content, PendingIntent pendingIntent){
+        Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
+                .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                .setContentTitle(context.getString(R.string.notification_title))
+                .setContentText(content)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .build();
+
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Log.d("onReceive", "Sending notification");
+        notificationManager.notify(0, notification);
+
     }
 }

@@ -1,4 +1,4 @@
-package com.nghianguyen.intheneighborhood.settings;
+package com.nghianguyen.intheneighborhood.ui.settings;
 
 import android.content.Context;
 import android.content.res.TypedArray;

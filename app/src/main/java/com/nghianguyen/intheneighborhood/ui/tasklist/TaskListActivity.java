@@ -1,20 +1,29 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -23,59 +32,66 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
-import com.nghianguyen.intheneighborhood.data.Task;
+import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.TaskOpenHelper;
 import com.nghianguyen.intheneighborhood.map.GoogleApiConnectActivity;
-import com.nghianguyen.intheneighborhood.settings.SettingsActivity;
+import com.nghianguyen.intheneighborhood.ui.settings.SettingsActivity;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
-import java.util.ArrayList;
+import java.util.List;
 
-public class TaskListActivity extends GoogleApiConnectActivity {
+import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
+
+public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View{
+
+    @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
+    @BindView(R.id.fab) public FloatingActionButton fab;
 
     private TaskAdapter mAdapter;
-    private ArrayList<Task> mTasks;
-
-    private FusedLocationProviderClient fusedLocationProviderClient;
-    private LocationRequest locationRequest;
-    private LocationCallback locationCallback;
 
     private BroadcastReceiver receiver;
+
+    private TaskListContract.Presenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        TaskListView view = findViewById(R.id.content);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(TaskListActivity.this, TaskActivity.class));
+            }
+        });
 
-        mTasks = getTasks();
-        mAdapter = new TaskAdapter(this, mTasks);
+        TaskListModel model = new TaskListModel(TaskDbManager.get(this), new FusedLocationProviderClient(this));
 
-        RecyclerView recyclerView = view.taskList;
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        presenter = new TaskListPresenter(this, model){
+            @Override
+            void startLocationUpdates(FusedLocationProviderClient fusedLocationProviderClient,
+                                      LocationRequest locationRequest, LocationCallback locationCallback) {
+                TaskListActivity.this.startLocationUpdates(fusedLocationProviderClient, locationRequest,
+                        locationCallback);
+            }
+        };
+
+        taskList.setLayoutManager(new LinearLayoutManager(this));
+
+        registerForContextMenu(taskList);
 
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mTasks = getTasks();
-                mAdapter.refresh(mTasks);
-            }
-        };
-
-        fusedLocationProviderClient = new FusedLocationProviderClient(this);
-        locationRequest = new LocationRequest()
-                .setInterval(10 * 1000)
-                .setFastestInterval(5 * 1000)
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationCallback = new LocationCallback(){
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                mAdapter.updateNearbyTasks(locationResult.getLastLocation());
+                if(presenter != null){
+                    presenter.refreshTasks();
+                }
             }
         };
 
@@ -90,19 +106,24 @@ public class TaskListActivity extends GoogleApiConnectActivity {
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter(TaskOpenHelper.DB_UPDATED));
-        startLocationUpdates();
+        presenter.onAttach();
     }
 
     @Override
     protected void onPause() {
         unregisterReceiver(receiver);
-        stopLocationUpdates();
+        presenter.onDetach();
         super.onPause();
     }
 
     @Override
+    protected void onDestroy() {
+        presenter.finish();
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -112,7 +133,6 @@ public class TaskListActivity extends GoogleApiConnectActivity {
 
         switch (item.getItemId()){
             case R.id.action_new_task:
-                // Add new blank Task to the singleton
                 startActivity(new Intent(this, TaskActivity.class));
                 return true;
             case R.id.action_clear_all_tasks:
@@ -128,7 +148,40 @@ public class TaskListActivity extends GoogleApiConnectActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        int itemIndex = ((ContextMenuRecyclerView.RecyclerViewContextMenuInfo) menuInfo).position;
+
+        Task task = ((TaskAdapter) taskList.getAdapter()).getTask(itemIndex);
+        itemPos = itemIndex;
+        if(task.isDone()) {
+            menu.add(Menu.NONE, R.id.context_menu_mark_not_done, Menu.NONE,
+                    R.string.context_menu_mark_not_done);
+        }else{
+            menu.add(Menu.NONE, R.id.context_menu_mark_done, Menu.NONE,
+                    R.string.context_menu_mark_done);
+        }
+
+    }
+
+    private int itemPos = -1;
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.context_menu_mark_not_done:
+                Toast.makeText(this, "marking not done - " + itemPos, Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.context_menu_mark_done:
+                Toast.makeText(this, "marking done - " + itemPos, Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 
     @Override
@@ -136,33 +189,47 @@ public class TaskListActivity extends GoogleApiConnectActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
-            // TODO: Refactor?
-            new ProximityAlertManager(this).updateAllProximityAlerts(getTasks());
+            presenter.updateProximityAlerts(ProximityAlertManager.get(this));
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(grantResults.length > 0){
-
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 Log.d("onRequestPermissionsRe", "ACCESS_FINE_LOCATION access granted");
             }
         }
     }
 
-    private void startLocationUpdates(){
+    @Override
+    public void showTasks(List<Task> tasks) {
+        mAdapter = new TaskAdapter(this, tasks, taskList);
+
+        taskList.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void updateLocation(LocationResult locationResult) {
+        if(mAdapter != null){
+            mAdapter.updateNearbyTasks(locationResult.getLastLocation());
+        }
+    }
+
+    @Override
+    public void updateAdapter(List<Task> tasks) {
+        if(mAdapter != null){
+            mAdapter.refresh(tasks);
+        }
+    }
+
+    private void startLocationUpdates(FusedLocationProviderClient fusedLocationProviderClient,
+                                      LocationRequest locationRequest, LocationCallback locationCallback){
+
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED){
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
         }
-    }
 
-    private void stopLocationUpdates(){
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-    }
-
-    private ArrayList<Task> getTasks(){
-        return TaskDbManager.get(this).getTasks();
     }
 }
