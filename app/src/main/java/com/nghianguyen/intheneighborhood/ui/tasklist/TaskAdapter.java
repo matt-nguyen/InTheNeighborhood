@@ -14,44 +14,32 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
+import com.nghianguyen.intheneighborhood.ui.tasklist.adapter.TaskListItemPresenter;
+import com.nghianguyen.intheneighborhood.ui.tasklist.adapter.TaskListItemView;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
 
-    private List<Task> mTasks;
-    private Context mContext;
-    private ContextMenuRecyclerView recyclerView;
+    private Context context;
 
-    public TaskAdapter(Context c, List<Task> tasks, ContextMenuRecyclerView recyclerView){
-        mContext = c;
-        mTasks = tasks;
-        this.recyclerView = recyclerView;
-        Log.d("TaskAdapter", "Task size - " + mTasks.size());
+    private TaskListItemPresenter presenter;
+
+    public TaskAdapter(Context c, TaskListItemPresenter presenter){
+        context = c;
+        this.presenter = presenter;
     }
 
-    public void refresh(List<Task> updatedTasks){
-        mTasks = updatedTasks;
-        notifyDataSetChanged();
-    }
-
-    /****************************************************************
-     * Where we inflate layouts to create and return the ViewHolder
-     * @param parent
-     * @param viewType
-     * @return
-     ****************************************************************/
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // Get the inflater from the parent's context
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-        // Inflate layout of the list item
         View taskView = inflater.inflate(R.layout.item_task2, parent, false);
         Log.d("onCreateViewHolder", "layout inflated");
         return new ViewHolder(taskView);
@@ -59,39 +47,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        presenter.onBindViewAtPosition(holder, position);
 
-        Task task = mTasks.get(position);
-
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                recyclerView.showContextMenuForChild(view);
-                return true;
-            }
-        });
-
-        holder.itemView.setAlpha(
-                (task.isDone()) ? 0.5f : 1.0f
-        );
-
-        holder.nearbyView.setVisibility(
-                (!task.isDone() && task.isNearby()) ? View.VISIBLE : View.GONE
-        );
-
-        holder.descriptionTextView.setText(task.getDescription());
-        holder.locNameTextView.setText(task.getLocName());
-        holder.locAddrTextView.setText(task.getLocAddress());
-        holder.locMapImageView.setImageBitmap(task.getLocMapImage());
-
-        // Clicking on the task viewholder will open the TaskActivity
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(mContext, TaskActivity.class);
+                Intent intent = new Intent(context, TaskActivity.class);
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID,
-                        mTasks.get(holder.getAdapterPosition()).getDb_id());
+                        presenter.getTask(holder.getAdapterPosition()).getDb_id());
 
-                ((Activity)mContext).startActivityForResult(intent, 0);
+                ((Activity) context).startActivityForResult(intent, 0);
             }
         });
 
@@ -99,73 +64,87 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
 
     @Override
     public int getItemCount() {
-        return mTasks.size();
+        return presenter.getItemCount();
+    }
+
+    public void refresh(List<Task> updatedTasks){
+        presenter.refresh(updatedTasks);
+        notifyDataSetChanged();
     }
 
     public Task getTask(int position){
-        return mTasks.get(position);
+        return presenter.getTask(position);
     }
 
     public void updateNearbyTasks(Location location){
         if(location == null) return;
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         int proximityDistance = sharedPrefs.getInt("pref_distance", 1);
 
-        List<Task> nearbyTasks = new ArrayList<>();
-
-        LatLng locLatLng;
-        Location taskLocation;
-        for (Task task : mTasks) {
-            locLatLng = task.getLocLatLng();
-            if(locLatLng != null){
-                taskLocation = new Location("");
-                taskLocation.setLatitude(locLatLng.latitude);
-                taskLocation.setLongitude(locLatLng.longitude);
-
-                if(!task.isDone() && proximityDistance >= (location.distanceTo(taskLocation) / 1609)){
-                    task.setNearby(true);
-                    nearbyTasks.add(task);
-                }else{
-                    task.setNearby(false);
-                }
-            }
-        }
-
-        // Shift nearby tasks to the top
-        mTasks.removeAll(nearbyTasks);
-        mTasks.addAll(0, nearbyTasks);
-
+        presenter.updateNearbyTasks(location, proximityDistance);
 
         notifyDataSetChanged();
     }
 
+    public static class ViewHolder extends RecyclerView.ViewHolder implements TaskListItemView{
 
-    // Provides direct reference to each of the views within a data item
-    // Used to cache the views within the item layout for fast access
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+        @BindView(R.id.descriptionTextView) public TextView descriptionTextView;
+        @BindView(R.id.locNameTextView) public TextView locNameTextView;
+        @BindView(R.id.locAddrTextView) public TextView locAddrTextView;
+        @BindView(R.id.locMapImageView) public ImageView locMapImageView;
+        @BindView(R.id.nearby_indicator) public View nearbyView;
 
-        // Holder should have member variables for any view that will be set
-        // in each row
-        public TextView descriptionTextView;
-        public TextView locNameTextView;
-        public TextView locAddrTextView;
-        public ImageView locMapImageView;
-        public View nearbyView;
-        public View taskItemView;
+        private TaskListItemPresenter presenter;
 
-        // Parameter is the entire item row view
         public ViewHolder(View v){
             super(v);
-            taskItemView = v;
-            descriptionTextView = (TextView)v.findViewById(R.id.descriptionTextView);
-            locNameTextView = (TextView)v.findViewById(R.id.locNameTextView);
-            locAddrTextView = (TextView)v.findViewById(R.id.locAddrTextView);
-            locMapImageView = (ImageView)v.findViewById(R.id.locMapImageView);
+            ButterKnife.bind(this, v);
+            descriptionTextView = v.findViewById(R.id.descriptionTextView);
+            locNameTextView = v.findViewById(R.id.locNameTextView);
+            locAddrTextView = v.findViewById(R.id.locAddrTextView);
+            locMapImageView = v.findViewById(R.id.locMapImageView);
             nearbyView = v.findViewById(R.id.nearby_indicator);
 
+            setClickEvents();
         }
 
+        private void setClickEvents(){
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    presenter.showContextMenu(v);
+                    return true;
+                }
+            });
+        }
+
+        @Override
+        public void setPresenter(TaskListItemPresenter presenter) {
+            this.presenter = presenter;
+        }
+
+        @Override
+        public void displayTask(Task task) {
+            descriptionTextView.setText(task.getDescription());
+            locNameTextView.setText(task.getLocName());
+            locAddrTextView.setText(task.getLocAddress());
+            locMapImageView.setImageBitmap(task.getLocMapImage());
+        }
+
+        @Override
+        public void setDone(boolean isDone) {
+            itemView.setAlpha(
+                    (isDone) ? 0.5f : 1.0f
+            );
+        }
+
+        @Override
+        public void showIsNearby(boolean isNearby) {
+            nearbyView.setVisibility(
+                    (isNearby) ? View.VISIBLE : View.GONE
+            );
+        }
     }
 
 }
