@@ -68,6 +68,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(TaskListActivity.this, TaskActivity.class));
+                
             }
         });
 
