@@ -27,4 +27,12 @@ public class TaskListModel {
     public FusedLocationProviderClient getFusedLocationProviderClient(){
         return fusedLocationProviderClient;
     }
+
+    public void updateTask(Task task){
+        taskManager.updateTask(task);
+    }
+
+    public void deleteTask(Task task){
+        taskManager.deleteTask(task);
+    }
 }
