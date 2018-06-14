@@ -39,6 +39,7 @@ import com.nghianguyen.intheneighborhood.data.TaskOpenHelper;
 import com.nghianguyen.intheneighborhood.map.GoogleApiConnectActivity;
 import com.nghianguyen.intheneighborhood.ui.settings.SettingsActivity;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
+import com.nghianguyen.intheneighborhood.ui.tasklist.adapter.TaskListItemPresenter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -219,7 +220,8 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
     @Override
     public void showTasks(List<Task> tasks) {
-        mAdapter = new TaskAdapter(this, tasks, taskList);
+        TaskListItemPresenter taskListItemPresenter = new TaskListItemPresenter(tasks, taskList);
+        mAdapter = new TaskAdapter(this, taskListItemPresenter);
 
         taskList.setAdapter(mAdapter);
     }
