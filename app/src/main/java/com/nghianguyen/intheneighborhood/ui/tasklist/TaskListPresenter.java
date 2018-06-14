@@ -59,6 +59,21 @@ public abstract class TaskListPresenter implements TaskListContract.Presenter{
     }
 
     @Override
+    public void setTaskDone(Task task, boolean isDone) {
+        task.setDone(isDone);
+        model.updateTask(task);
+        refreshTasks();
+    }
+
+    @Override
+    public void deleteTask(Task task) {
+        model.deleteTask(task);
+        refreshTasks();
+
+        view.displayMessage("Removed - " + task.getDescription());
+    }
+
+    @Override
     public void startLocationUpdates() {
         startLocationUpdates(model.getFusedLocationProviderClient(), locationRequest, locationCallback);
     }

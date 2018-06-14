@@ -44,6 +44,13 @@ public class TaskDbManager {
         proximityAlertManager.addProximityAlert(t, id);
     }
 
+    public void deleteTask(Task t){
+        int deletedCount = dbHelper.deleteTask(t);
+        if(deletedCount > 0){
+            proximityAlertManager.removeProximityAlert(t, t.getDb_id());
+        }
+    }
+
     public void clearTasks(){
         dbHelper.clearTasks();
         proximityAlertManager.removeAllProximityAlerts(dbHelper.getTasks());

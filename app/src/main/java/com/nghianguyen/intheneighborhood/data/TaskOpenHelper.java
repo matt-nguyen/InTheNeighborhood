@@ -233,6 +233,13 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
         return id;
     }
 
+    public int deleteTask(Task t){
+        String whereClause = "rowid = ?";
+        String[] whereArgs = new String[]{String.valueOf(t.getDb_id())};
+
+        return getWritableDatabase().delete(TASK_TABLE_NAME, whereClause, whereArgs);
+    }
+
     public void clearTasks(){
         getWritableDatabase().execSQL("DELETE FROM " + TASK_TABLE_NAME);
         notifyUpdate();

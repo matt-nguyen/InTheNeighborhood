@@ -11,11 +11,14 @@ public interface TaskListContract {
         void showTasks(List<Task> tasks);
         void updateLocation(LocationResult locationResult);
         void updateAdapter(List<Task> tasks);
+        void displayMessage(String message);
     }
 
     interface Presenter{
         void loadTasks();
         void refreshTasks();
+        void setTaskDone(Task task, boolean isDone);
+        void deleteTask(Task task);
         void updateProximityAlerts(ProximityAlertManager proximityAlertManager);
         void onAttach();
         void onDetach();

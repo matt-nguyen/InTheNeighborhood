@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -68,7 +69,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(TaskListActivity.this, TaskActivity.class));
-                
+
             }
         });
 
@@ -155,6 +156,8 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
+        getMenuInflater().inflate(R.menu.menu_context_task, menu);
+
         int itemIndex = ((ContextMenuRecyclerView.RecyclerViewContextMenuInfo) menuInfo).position;
 
         Task task = ((TaskAdapter) taskList.getAdapter()).getTask(itemIndex);
@@ -173,12 +176,23 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        Task task = mAdapter.getTask(itemPos);
+
         switch (item.getItemId()){
+            case R.id.edit_task:
+                Intent intent = new Intent(this, TaskActivity.class);
+                intent.putExtra(TaskActivity.EXTRA_TASK_ID, task.getDb_id());
+
+                startActivityForResult(intent, 0);
+                return true;
+            case R.id.delete_task:
+                presenter.deleteTask(task);
+                return true;
             case R.id.context_menu_mark_not_done:
-                Toast.makeText(this, "marking not done - " + itemPos, Toast.LENGTH_SHORT).show();
+                presenter.setTaskDone(task, false);
                 return true;
             case R.id.context_menu_mark_done:
-                Toast.makeText(this, "marking done - " + itemPos, Toast.LENGTH_SHORT).show();
+                presenter.setTaskDone(task, true);
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -221,6 +235,13 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
     public void updateAdapter(List<Task> tasks) {
         if(mAdapter != null){
             mAdapter.refresh(tasks);
+        }
+    }
+
+    @Override
+    public void displayMessage(String message) {
+        if(!TextUtils.isEmpty(message)) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
 
