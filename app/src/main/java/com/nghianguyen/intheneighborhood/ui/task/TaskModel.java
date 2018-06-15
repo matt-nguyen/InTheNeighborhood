@@ -39,6 +39,10 @@ public class TaskModel {
         task.setDescription(description);
     }
 
+    public void setLocationName(String locationName){
+        task.setLocName(locationName);
+    }
+
     public void setLocation(Place place){
         task.setLocName(place.getName().toString());
         task.setLocAddress(place.getAddress().toString());

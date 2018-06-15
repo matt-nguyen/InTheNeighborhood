@@ -14,7 +14,10 @@ public interface TaskContract {
 
         void showTaskDone(boolean isDone);
 
-        void showLocationName(String locName);
+        void
+        showLocationName(String locName);
+
+        void showLocationAddress(String address);
     }
 
     interface Presenter{
@@ -25,6 +28,8 @@ public interface TaskContract {
         void updatePlace(Place place);
 
         void setDescription(String description);
+
+        void setLocationName(String locationName);
 
         void markDoneStatus(boolean isDone);
 

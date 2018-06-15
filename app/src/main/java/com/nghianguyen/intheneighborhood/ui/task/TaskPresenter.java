@@ -31,6 +31,7 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
 
         view.displayDescription(task.getDescription());
         view.showLocationName(task.getLocName());
+        view.showLocationAddress(task.getLocAddress());
         view.showTaskDone(task.isDone());
     }
 
@@ -38,6 +39,13 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
     public void setDescription(String description) {
         if(!TextUtils.isEmpty(description)) {
             model.setDescription(description);
+        }
+    }
+
+    @Override
+    public void setLocationName(String locationName) {
+        if(!TextUtils.isEmpty(locationName)){
+            model.setLocationName(locationName);
         }
     }
 
@@ -81,6 +89,7 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
             LatLng latLng = place.getLatLng();
 
             view.showLocationName(placeName);
+            view.showLocationAddress(place.getAddress().toString());
 
             model.setLocation(place);
 

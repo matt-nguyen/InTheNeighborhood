@@ -9,14 +9,18 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.nghianguyen.intheneighborhood.R;
+import com.nghianguyen.intheneighborhood.core.SimpleTextWatcher;
 
 public class TaskView implements TaskContract.View{
 
     public EditText descriptionEditText;
     public Button selectPlaceButton;
     public CheckBox isDoneCheckbox;
+    public EditText locationName;
+    public TextView addressText;
 
     private TaskContract.Presenter presenter;
 
@@ -24,7 +28,8 @@ public class TaskView implements TaskContract.View{
         descriptionEditText = activity.findViewById(R.id.descriptionEditText);
         selectPlaceButton = activity.findViewById(R.id.selectPlaceButton);
         isDoneCheckbox = activity.findViewById(R.id.isDoneCheckBox);
-
+        locationName = activity.findViewById(R.id.location_name);
+        addressText = activity.findViewById(R.id.location_address);
     }
 
     @Override
@@ -49,25 +54,28 @@ public class TaskView implements TaskContract.View{
     @Override
     public void showLocationName(String locName) {
         if(!TextUtils.isEmpty(locName)) {
-            selectPlaceButton.setText(locName);
+            selectPlaceButton.setText(R.string.button_update_place);
+            locationName.setText(locName);
         }
     }
 
+    @Override
+    public void showLocationAddress(String address) {
+        addressText.setText(address);
+    }
+
     private void setup(){
-        descriptionEditText.addTextChangedListener(new TextWatcher() {
+        descriptionEditText.addTextChangedListener(new SimpleTextWatcher(){
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+            public void afterTextChanged(Editable s) {
+                presenter.setDescription(s.toString());
             }
+        });
 
+        locationName.addTextChangedListener(new SimpleTextWatcher() {
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                presenter.setDescription(editable.toString());
+            public void afterTextChanged(Editable s) {
+                presenter.setLocationName(s.toString());
             }
         });
 
