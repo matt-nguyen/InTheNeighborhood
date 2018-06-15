@@ -23,4 +23,6 @@
     <string name="task_description_hint">Enter Task Description</string>
     <string name="task_location_hint">Location Name</string>
     <string name="task_location_address_label">Address</string>
+    <string name="task_done_label">Done?</string>
+    <string name="delete_label">Delete</string>
 </resources>

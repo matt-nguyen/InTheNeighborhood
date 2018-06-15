@@ -20,6 +20,8 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
     private GoogleMap map;
     private MapsService mapsService;
 
+    private boolean taskDeleted = false;
+
     public TaskPresenter(TaskContract.View view, TaskModel model,
                          MapsService mapsService){
         this.view = view;
@@ -88,7 +90,9 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
             String placeName = place.getName().toString();
             LatLng latLng = place.getLatLng();
 
-            view.showLocationName(placeName);
+            if(!view.isLocationNameEntered()){
+                view.showLocationName(placeName);
+            }
             view.showLocationAddress(place.getAddress().toString());
 
             model.setLocation(place);
@@ -114,14 +118,16 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
             public void onSnapshotReady(Bitmap bitmap) {
                 if(bitmap != null) {
                     // Determine start of Y for cropping
-                    int height = bitmap.getHeight();
-                    int newHeight = (int) (height * 0.3);
-                    int startY = (height - newHeight) / 2;
+//                    int height = bitmap.getHeight();
+//                    int newHeight = (int) (height * 0.3);
+//                    int startY = (height - newHeight) / 2;
+//
+//                    model.setLocMapImage(
+//                            Bitmap.createBitmap(bitmap, 0, startY,
+//                                    bitmap.getWidth(), newHeight)
+//                    );
 
-                    model.setLocMapImage(
-                            Bitmap.createBitmap(bitmap, 0, startY,
-                                    bitmap.getWidth(), newHeight)
-                    );
+                    model.setLocMapImage(processBitmap(bitmap));
 
                     // display the current indicator after snapshot
                     mapsService.setMyLocationEnabled(map, true);
@@ -130,13 +136,34 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         });
     }
 
+    private Bitmap processBitmap(Bitmap bitmap){
+        // Determine start of Y for cropping
+        int height = bitmap.getHeight();
+
+        int newHeight = (int) (height * 0.3);
+        int startY = (height - newHeight) / 2;
+
+        return Bitmap.createBitmap(bitmap, 0, startY, bitmap.getWidth(), newHeight);
+    }
+
+    @Override
+    public void deleteTask() {
+        model.deleteTask();
+        taskDeleted = true;
+        exitScreen();
+    }
+
 
     @Override
     public void finish(){
-        model.saveTask();
+        if(!taskDeleted) {
+            model.saveTask();
+        }
         view = null;
         mapsService = null;
     }
 
     abstract void beginSavingSnapshot();
+
+    abstract void exitScreen();
 }

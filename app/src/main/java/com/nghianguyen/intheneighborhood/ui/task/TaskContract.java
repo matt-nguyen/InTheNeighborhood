@@ -14,8 +14,9 @@ public interface TaskContract {
 
         void showTaskDone(boolean isDone);
 
-        void
-        showLocationName(String locName);
+        void showLocationName(String locName);
+
+        boolean isLocationNameEntered();
 
         void showLocationAddress(String address);
     }
@@ -34,6 +35,8 @@ public interface TaskContract {
         void markDoneStatus(boolean isDone);
 
         void saveSnapshot();
+
+        void deleteTask();
 
         void finish();
     }

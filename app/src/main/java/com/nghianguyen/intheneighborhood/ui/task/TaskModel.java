@@ -27,10 +27,8 @@ public class TaskModel {
             return;
 
         if(task.getDb_id() > -1){
-            Log.d("TESTING", "updating task");
             manager.updateTask(task);
         }else{
-            Log.d("TESTING", "adding task");
             manager.addTask(task);
         }
     }
@@ -49,23 +47,15 @@ public class TaskModel {
         task.setLocLatLng(place.getLatLng());
     }
 
-//    public void setLocName(String locName){
-//        task.setLocName(locName);
-//    }
-//
-//    public void setLocAddr(String locAddr){
-//        task.setLocAddress(locAddr);
-//    }
-//
-//    public void setLocLatLng(LatLng locLatLng){
-//        task.setLocLatLng(locLatLng);
-//    }
-
     public void setLocMapImage(Bitmap locMapImage){
         task.setLocMapImage(locMapImage);
     }
 
     public void toggleDone(boolean isDone){
         task.setDone(isDone);
+    }
+
+    public void deleteTask(){
+        manager.deleteTask(task);
     }
 }

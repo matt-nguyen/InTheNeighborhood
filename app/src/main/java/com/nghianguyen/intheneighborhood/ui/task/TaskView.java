@@ -21,6 +21,7 @@ public class TaskView implements TaskContract.View{
     public CheckBox isDoneCheckbox;
     public EditText locationName;
     public TextView addressText;
+    public View deleteButton;
 
     private TaskContract.Presenter presenter;
 
@@ -30,6 +31,7 @@ public class TaskView implements TaskContract.View{
         isDoneCheckbox = activity.findViewById(R.id.isDoneCheckBox);
         locationName = activity.findViewById(R.id.location_name);
         addressText = activity.findViewById(R.id.location_address);
+        deleteButton = activity.findViewById(R.id.delete_button);
     }
 
     @Override
@@ -60,8 +62,17 @@ public class TaskView implements TaskContract.View{
     }
 
     @Override
+    public boolean isLocationNameEntered() {
+        return !TextUtils.isEmpty(locationName.getText());
+    }
+
+    @Override
     public void showLocationAddress(String address) {
-        addressText.setText(address);
+        if(!TextUtils.isEmpty(address)) {
+            addressText.setText(address);
+        }else{
+            addressText.setText(R.string.task_location_address_label);
+        }
     }
 
     private void setup(){
@@ -90,6 +101,13 @@ public class TaskView implements TaskContract.View{
             @Override
             public void onClick(View view) {
                 presenter.pickPlace();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.deleteTask();
             }
         });
     }

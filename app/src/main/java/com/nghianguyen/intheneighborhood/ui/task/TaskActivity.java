@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -33,6 +34,12 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
 
+        ActionBar supportActionBar = getSupportActionBar();
+
+        if(supportActionBar != null){
+            supportActionBar.setTitle("Task");
+        }
+
         Intent intent = getIntent();
         int taskId = -1;
         if(intent != null){
@@ -40,7 +47,6 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         }
 
         TaskContract.View taskView = new TaskView(this);
-
         TaskModel model = new TaskModel(TaskDbManager.get(this), taskId);
 
         presenter = new TaskPresenter(taskView, model, this){
@@ -48,18 +54,26 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             void beginSavingSnapshot() {
                 TaskActivity.this.beginSavingSnapshot();
             }
+
+            @Override
+            void exitScreen() {
+                TaskActivity.this.finish();
+            }
         };
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
+        startMap();
     }
 
     @Override
     protected void onDestroy() {
         presenter.finish();
         super.onDestroy();
+    }
+
+    private void startMap(){
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     @Override
