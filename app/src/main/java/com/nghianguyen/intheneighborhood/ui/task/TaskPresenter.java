@@ -85,7 +85,7 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
     }
 
     @Override
-    public void updatePlace(Place place){
+    public void onPlaceUpdated(Place place){
         if(place != null){
             String placeName = place.getName().toString();
             LatLng latLng = place.getLatLng();
@@ -97,12 +97,16 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
 
             model.setLocation(place);
 
-            map.clear();
-            map.addMarker(new MarkerOptions().position(latLng).title(placeName));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+            updateMapVisual(latLng, placeName);
 
             startSavingSnapshot();
         }
+    }
+
+    private void updateMapVisual(LatLng latLng, String placeName){
+        map.clear();
+        map.addMarker(new MarkerOptions().position(latLng).title(placeName));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
     }
 
     private void startSavingSnapshot(){
@@ -117,30 +121,18 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
             @Override
             public void onSnapshotReady(Bitmap bitmap) {
                 if(bitmap != null) {
-                    // Determine start of Y for cropping
-//                    int height = bitmap.getHeight();
-//                    int newHeight = (int) (height * 0.3);
-//                    int startY = (height - newHeight) / 2;
-//
-//                    model.setLocMapImage(
-//                            Bitmap.createBitmap(bitmap, 0, startY,
-//                                    bitmap.getWidth(), newHeight)
-//                    );
-
                     model.setLocMapImage(processBitmap(bitmap));
-
-                    // display the current indicator after snapshot
-                    mapsService.setMyLocationEnabled(map, true);
                 }
+
+                mapsService.setMyLocationEnabled(map, true);
             }
         });
     }
 
     private Bitmap processBitmap(Bitmap bitmap){
-        // Determine start of Y for cropping
         int height = bitmap.getHeight();
 
-        int newHeight = (int) (height * 0.3);
+        int newHeight = (int) (height * 0.4);
         int startY = (height - newHeight) / 2;
 
         return Bitmap.createBitmap(bitmap, 0, startY, bitmap.getWidth(), newHeight);

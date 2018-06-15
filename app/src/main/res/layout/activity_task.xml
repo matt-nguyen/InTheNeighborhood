@@ -22,12 +22,15 @@
         android:maxLines="2"
         android:inputType="textCapSentences"
         android:hint="@string/task_description_hint"
-        android:background="@null"/>
+        android:background="@null"
+        android:textSize="18sp"/>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#CCCCCC"/>
+        android:background="#CCCCCC"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"/>
 
     <EditText
         android:id="@+id/location_name"
@@ -40,12 +43,15 @@
         android:inputType="textCapSentences"
         android:hint="@string/task_location_hint"
         android:maxLines="1"
-        android:background="@null"/>
+        android:background="@null"
+        android:textSize="16sp"/>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#CCCCCC"/>
+        android:background="#CCCCCC"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"/>
 
     <TextView
         android:id="@+id/location_address"
@@ -55,6 +61,7 @@
         android:layout_marginBottom="12dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:textSize="16sp"
         android:text="@string/task_location_address_label"/>
 
     <LinearLayout

@@ -115,7 +115,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK){
             Place place = PlacePicker.getPlace(this, data);
-            presenter.updatePlace(place);
+            presenter.onPlaceUpdated(place);
         }
     }
 

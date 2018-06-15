@@ -26,7 +26,7 @@ public interface TaskContract {
 
         void pickPlace();
 
-        void updatePlace(Place place);
+        void onPlaceUpdated(Place place);
 
         void setDescription(String description);
 
