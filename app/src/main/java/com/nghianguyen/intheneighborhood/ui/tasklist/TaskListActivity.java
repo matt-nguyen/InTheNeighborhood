@@ -49,6 +49,7 @@ import java.util.List;
 import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View{
+    public static final int REQUEST_CODE_TASK_DELETED = 100;
 
     @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
     @BindView(R.id.fab) public FloatingActionButton fab;
@@ -184,7 +185,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
                 Intent intent = new Intent(this, TaskActivity.class);
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID, task.getDb_id());
 
-                startActivityForResult(intent, 0);
+                startActivityForResult(intent, REQUEST_CODE_TASK_DELETED);
                 return true;
             case R.id.delete_task:
                 presenter.deleteTask(task);
@@ -205,7 +206,14 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
+
             presenter.updateProximityAlerts(ProximityAlertManager.get(this));
+
+        }else if(requestCode == REQUEST_CODE_TASK_DELETED){
+
+            if(resultCode == RESULT_OK) {
+                presenter.refreshTasks();
+            }
         }
     }
 
@@ -221,7 +229,12 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
     @Override
     public void showTasks(List<Task> tasks) {
         TaskListItemPresenter taskListItemPresenter = new TaskListItemPresenter(tasks, taskList);
-        mAdapter = new TaskAdapter(this, taskListItemPresenter);
+        mAdapter = new TaskAdapter(this, taskListItemPresenter){
+            @Override
+            void startActivityForResult(Intent intent) {
+                TaskListActivity.this.startActivityForResult(intent, REQUEST_CODE_TASK_DELETED);
+            }
+        };
 
         taskList.setAdapter(mAdapter);
     }

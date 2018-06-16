@@ -8,8 +8,6 @@ import com.google.android.gms.maps.GoogleMap;
 public interface TaskContract {
 
     interface View{
-        void setPresenter(Presenter presenter);
-
         void displayDescription(String description);
 
         void showTaskDone(boolean isDone);
@@ -19,6 +17,8 @@ public interface TaskContract {
         boolean isLocationNameEntered();
 
         void showLocationAddress(String address);
+
+        void deleteTaskConfirmed();
     }
 
     interface Presenter{

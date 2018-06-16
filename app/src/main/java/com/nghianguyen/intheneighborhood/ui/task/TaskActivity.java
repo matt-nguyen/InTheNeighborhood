@@ -7,6 +7,13 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -18,14 +25,25 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.core.MapsService;
+import com.nghianguyen.intheneighborhood.core.SimpleTextWatcher;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.map.GoogleApiConnectActivity;
 import com.nghianguyen.intheneighborhood.map.GoogleServiceManager;
 
-public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback, MapsService {
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
+public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback,
+        MapsService, TaskContract.View{
     public static final String EXTRA_TASK_ID =
             "com.nghianguyen.intheneighborhood.task_id";
+
+    @BindView(R.id.descriptionEditText) public EditText descriptionEditText;
+    @BindView(R.id.selectPlaceButton) public TextView selectPlaceButton;
+    @BindView(R.id.isDoneCheckBox) public CheckBox isDoneCheckbox;
+    @BindView(R.id.location_name) public EditText locationName;
+    @BindView(R.id.location_address) public TextView addressText;
+    @BindView(R.id.delete_button) public View deleteButton;
 
     private TaskContract.Presenter presenter;
 
@@ -33,9 +51,9 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
+        ButterKnife.bind(this);
 
         ActionBar supportActionBar = getSupportActionBar();
-
         if(supportActionBar != null){
             supportActionBar.setTitle("Task");
         }
@@ -44,30 +62,39 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         int taskId = -1;
         if(intent != null){
             taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
+
+            if(taskId == -1) {
+                deleteButton.setVisibility(View.GONE);
+            }
         }
 
-        TaskContract.View taskView = new TaskView(this);
-        TaskModel model = new TaskModel(TaskDbManager.get(this), taskId);
-
-        presenter = new TaskPresenter(taskView, model, this){
-            @Override
-            void beginSavingSnapshot() {
-                TaskActivity.this.beginSavingSnapshot();
-            }
-
-            @Override
-            void exitScreen() {
-                TaskActivity.this.finish();
-            }
-        };
-
-        startMap();
+        setup(taskId);
     }
 
     @Override
     protected void onDestroy() {
         presenter.finish();
         super.onDestroy();
+    }
+
+    private void setup(int taskId){
+        TaskModel model = new TaskModel(TaskDbManager.get(this), taskId);
+        presenter = new TaskPresenter(this, model, this){
+            @Override
+            void beginSavingSnapshot() {
+                TaskActivity.this.beginSavingSnapshot();
+            }
+
+            @Override
+            void onTaskDeleted() {
+                TaskActivity.this.setResult(RESULT_OK);
+                TaskActivity.this.finish();
+            }
+        };
+
+        setupViewEvents();
+
+        startMap();
     }
 
     private void startMap(){
@@ -78,12 +105,10 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         setMyLocationEnabled(googleMap, true);
 
         Location currentLocation = GoogleServiceManager.get(this).getLastLocation();
         presenter.initializeMap(googleMap, currentLocation);
-
     }
 
     @Override
@@ -117,6 +142,84 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             Place place = PlacePicker.getPlace(this, data);
             presenter.onPlaceUpdated(place);
         }
+    }
+
+    @Override
+    public void displayDescription(String description) {
+        descriptionEditText.setText(description);
+    }
+
+    @Override
+    public void showTaskDone(boolean isDone) {
+        isDoneCheckbox.setChecked(isDone);
+    }
+
+    @Override
+    public void showLocationName(String locName) {
+        if(!TextUtils.isEmpty(locName)) {
+            selectPlaceButton.setText(R.string.button_update_place);
+            locationName.setText(locName);
+        }
+    }
+
+    @Override
+    public boolean isLocationNameEntered() {
+        return !TextUtils.isEmpty(locationName.getText());
+    }
+
+    @Override
+    public void showLocationAddress(String address) {
+        if(!TextUtils.isEmpty(address)) {
+            addressText.setText(address);
+        }else{
+            addressText.setText(R.string.task_location_address_label);
+        }
+    }
+
+    @Override
+    public void deleteTaskConfirmed() {
+        presenter.deleteTask();
+    }
+
+    private void setupViewEvents(){
+        descriptionEditText.addTextChangedListener(new SimpleTextWatcher(){
+            @Override
+            public void afterTextChanged(Editable s) {
+                presenter.setDescription(s.toString());
+            }
+        });
+
+        locationName.addTextChangedListener(new SimpleTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                presenter.setLocationName(s.toString());
+            }
+        });
+
+        isDoneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                presenter.markDoneStatus(b);
+            }
+        });
+
+        selectPlaceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.pickPlace();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openConfirmDeleteDialog();
+            }
+        });
+    }
+
+    private void openConfirmDeleteDialog(){
+        new ConfirmDeleteDialogFragment().show(getSupportFragmentManager(), "dialog");
     }
 
     private void beginSavingSnapshot(){

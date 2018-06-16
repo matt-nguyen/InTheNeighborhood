@@ -29,8 +29,6 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         this.model = model;
         this.mapsService = mapsService;
 
-        view.setPresenter(this);
-
         view.displayDescription(task.getDescription());
         view.showLocationName(task.getLocName());
         view.showLocationAddress(task.getLocAddress());
@@ -142,7 +140,8 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
     public void deleteTask() {
         model.deleteTask();
         taskDeleted = true;
-        exitScreen();
+
+        onTaskDeleted();
     }
 
 
@@ -157,5 +156,5 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
 
     abstract void beginSavingSnapshot();
 
-    abstract void exitScreen();
+    abstract void onTaskDeleted();
 }
