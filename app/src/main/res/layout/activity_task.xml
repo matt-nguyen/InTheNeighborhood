@@ -27,8 +27,29 @@
             android:id="@+id/selectPlaceButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
             android:text="@string/button_select_place"/>
+
+        <LinearLayout
+            android:id="@+id/remove_place_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_close_white_24dp"
+                android:tint="#FF0000"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:text="@string/button_remove_place"/>
+        </LinearLayout>
+
     </LinearLayout>
 
     <EditText
@@ -44,8 +65,6 @@
         android:hint="@string/task_description_hint"
         android:background="@null"
         android:textSize="18sp"/>
-    <!--android:layout_marginStart="16dp"-->
-    <!--android:layout_marginEnd="16dp"-->
 
     <View
         android:layout_width="match_parent"
@@ -67,8 +86,6 @@
         android:maxLines="1"
         android:background="@null"
         android:textSize="16sp"/>
-    <!--android:layout_marginStart="16dp"-->
-    <!--android:layout_marginEnd="16dp"-->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

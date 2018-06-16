@@ -49,6 +49,13 @@ public class TaskModel {
         task.setLocLatLng(place.getLatLng());
     }
 
+    public void removeLocation(){
+        task.setLocName(null);
+        task.setLocAddress(null);
+        task.setLocLatLng(null);
+        task.setLocMapImage(null);
+    }
+
     public void setLocMapImage(Bitmap locMapImage){
         task.setLocMapImage(locMapImage);
     }

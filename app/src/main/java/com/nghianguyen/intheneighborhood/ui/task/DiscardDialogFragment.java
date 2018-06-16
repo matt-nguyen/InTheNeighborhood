@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.nghianguyen.intheneighborhood.R;
+
 public class DiscardDialogFragment extends DialogFragment {
 
     private Listener listener;
@@ -28,8 +30,8 @@ public class DiscardDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
-                .setTitle("Do you want to discard this reminder?")
-                .setMessage("Your description needs to be filled out.")
+                .setTitle(R.string.dialog_discard_title)
+                .setMessage(R.string.dialog_discard_message)
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

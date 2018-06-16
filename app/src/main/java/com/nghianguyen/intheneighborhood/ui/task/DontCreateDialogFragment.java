@@ -9,6 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.nghianguyen.intheneighborhood.R;
+
 public class DontCreateDialogFragment extends DialogFragment {
 
     private Listener listener;
@@ -29,7 +31,7 @@ public class DontCreateDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
-                .setTitle("This reminder will not be saved without a description. Is that ok?")
+                .setTitle(R.string.dialog_dont_create_title)
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

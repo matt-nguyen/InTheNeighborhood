@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import com.nghianguyen.intheneighborhood.R;
+
 public class ConfirmDeleteDialogFragment extends DialogFragment {
 
     TaskContract.View taskView;
@@ -28,7 +30,7 @@ public class ConfirmDeleteDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
-                .setTitle("Are you sure you want to delete?")
+                .setTitle(R.string.dialog_confirm_delete_title)
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

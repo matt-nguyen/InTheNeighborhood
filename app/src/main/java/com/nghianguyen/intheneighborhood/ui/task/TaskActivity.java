@@ -46,6 +46,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     @BindView(R.id.location_name) public EditText locationName;
     @BindView(R.id.location_address) public TextView addressText;
     @BindView(R.id.delete_button) public View deleteButton;
+    @BindView(R.id.remove_place_button) public View removePlaceButton;
 
     private TaskContract.Presenter presenter;
 
@@ -123,6 +124,50 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         startMap();
     }
 
+    private void setupViewEvents(){
+        descriptionEditText.addTextChangedListener(new SimpleTextWatcher(){
+            @Override
+            public void afterTextChanged(Editable s) {
+                presenter.setDescription(s.toString());
+            }
+        });
+
+        locationName.addTextChangedListener(new SimpleTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                presenter.setLocationName(s.toString());
+            }
+        });
+
+        isDoneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                presenter.markDoneStatus(b);
+            }
+        });
+
+        selectPlaceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.pickPlace();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openConfirmDeleteDialog();
+            }
+        });
+
+        removePlaceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.removePlace();
+            }
+        });
+    }
+
     private void startMap(){
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -167,6 +212,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         if(resultCode == Activity.RESULT_OK){
             Place place = PlacePicker.getPlace(this, data);
             presenter.onPlaceUpdated(place);
+            removePlaceButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -184,8 +230,12 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     public void showLocationName(String locName) {
         if(!TextUtils.isEmpty(locName)) {
             selectPlaceButton.setText(R.string.button_update_place);
-            locationName.setText(locName);
+            removePlaceButton.setVisibility(View.VISIBLE);
+        }else{
+            selectPlaceButton.setText(R.string.button_select_place);
         }
+
+        locationName.setText(locName);
     }
 
     @Override
@@ -203,45 +253,17 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     }
 
     @Override
-    public void deleteTaskConfirmed() {
-        presenter.deleteTask();
+    public void clearLocation() {
+        showLocationAddress(null);
+        showLocationName(null);
+
+        selectPlaceButton.setText(R.string.button_select_place);
+        removePlaceButton.setVisibility(View.GONE);
     }
 
-    private void setupViewEvents(){
-        descriptionEditText.addTextChangedListener(new SimpleTextWatcher(){
-            @Override
-            public void afterTextChanged(Editable s) {
-                presenter.setDescription(s.toString());
-            }
-        });
-
-        locationName.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                presenter.setLocationName(s.toString());
-            }
-        });
-
-        isDoneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                presenter.markDoneStatus(b);
-            }
-        });
-
-        selectPlaceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                presenter.pickPlace();
-            }
-        });
-
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openConfirmDeleteDialog();
-            }
-        });
+    @Override
+    public void deleteTaskConfirmed() {
+        presenter.deleteTask();
     }
 
     private void openConfirmDeleteDialog(){

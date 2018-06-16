@@ -18,6 +18,8 @@ public interface TaskContract {
 
         void showLocationAddress(String address);
 
+        void clearLocation();
+
         void deleteTaskConfirmed();
     }
 
@@ -33,6 +35,8 @@ public interface TaskContract {
         void setLocationName(String locationName);
 
         void markDoneStatus(boolean isDone);
+
+        void removePlace();
 
         void saveSnapshot();
 

@@ -42,12 +42,21 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
 
     @Override
     public void setLocationName(String locationName) {
-            model.setLocationName(locationName);
+        model.setLocationName(locationName);
     }
 
     @Override
     public void markDoneStatus(boolean isDone) {
         model.toggleDone(isDone);
+    }
+
+    @Override
+    public void removePlace() {
+        model.removeLocation();
+        view.clearLocation();
+        map.clear();
+//        view.showLocationName(null);
+//        view.showLocationAddress(null);
     }
 
 

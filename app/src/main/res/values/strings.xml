@@ -25,4 +25,9 @@
     <string name="task_location_address_label">Address</string>
     <string name="task_done_label">Done?</string>
     <string name="delete_label">Delete</string>
+    <string name="dialog_confirm_delete_title">Are you sure you want to delete?</string>
+    <string name="dialog_discard_title">Do you want to discard this reminder?</string>
+    <string name="dialog_discard_message">Your description needs to be filled out.</string>
+    <string name="dialog_dont_create_title">This reminder will not be saved without a description. Is that ok?</string>
+    <string name="button_remove_place">Remove</string>
 </resources>
