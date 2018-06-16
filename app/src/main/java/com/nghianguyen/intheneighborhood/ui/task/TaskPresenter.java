@@ -37,16 +37,12 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
 
     @Override
     public void setDescription(String description) {
-        if(!TextUtils.isEmpty(description)) {
             model.setDescription(description);
-        }
     }
 
     @Override
     public void setLocationName(String locationName) {
-        if(!TextUtils.isEmpty(locationName)){
             model.setLocationName(locationName);
-        }
     }
 
     @Override
@@ -142,6 +138,18 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         taskDeleted = true;
 
         onTaskDeleted();
+    }
+
+    @Override
+    public boolean isReadyToExit() {
+        String description = model.task().getDescription();
+
+        return description != null && !TextUtils.isEmpty(description.trim());
+    }
+
+    @Override
+    public boolean isNewTask() {
+        return model.task().getDb_id() == -1;
     }
 
 

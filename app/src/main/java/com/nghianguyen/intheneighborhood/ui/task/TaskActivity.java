@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -34,9 +35,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback,
-        MapsService, TaskContract.View{
-    public static final String EXTRA_TASK_ID =
-            "com.nghianguyen.intheneighborhood.task_id";
+        MapsService, TaskContract.View, DontCreateDialogFragment.Listener,
+        DiscardDialogFragment.Listener{
+
+    public static final String EXTRA_TASK_ID = "task_id";
 
     @BindView(R.id.descriptionEditText) public EditText descriptionEditText;
     @BindView(R.id.selectPlaceButton) public TextView selectPlaceButton;
@@ -69,6 +71,30 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         }
 
         setup(taskId);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(presenter.isReadyToExit()) {
+            super.onBackPressed();
+        }else{
+            showAlert();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                if(presenter.isReadyToExit()){
+                    onBackPressed();
+                }else{
+                    showAlert();
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -242,4 +268,21 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         }).start();
     }
 
+    private void showAlert(){
+        if(presenter.isNewTask()) {
+            new DontCreateDialogFragment().show(getSupportFragmentManager(), "dontcreate");
+        }else{
+            new DiscardDialogFragment().show(getSupportFragmentManager(), "discard");
+        }
+    }
+
+    @Override
+    public void exitWithoutSaving() {
+        finish();
+    }
+
+    @Override
+    public void discardAndExit() {
+        presenter.deleteTask();
+    }
 }

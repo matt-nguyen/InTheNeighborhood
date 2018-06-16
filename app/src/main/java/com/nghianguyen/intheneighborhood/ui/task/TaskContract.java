@@ -38,6 +38,10 @@ public interface TaskContract {
 
         void deleteTask();
 
+        boolean isReadyToExit();
+
+        boolean isNewTask();
+
         void finish();
     }
 }

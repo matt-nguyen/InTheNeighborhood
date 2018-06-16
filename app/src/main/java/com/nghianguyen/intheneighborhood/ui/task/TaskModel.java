@@ -23,7 +23,9 @@ public class TaskModel {
     }
 
     public void saveTask(){
-        if(TextUtils.isEmpty(task.getDescription()))
+        String description = task.getDescription();
+        boolean dontSave = description == null || TextUtils.isEmpty(description.trim());
+        if(dontSave)
             return;
 
         if(task.getDb_id() > -1){
