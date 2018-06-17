@@ -121,7 +121,7 @@ public class ProximityAlertManager {
 
     private float getProximityDistance(){
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int distanceMiles = sharedPrefs.getInt("pref_distance", 1);
+        float distanceMiles = sharedPrefs.getFloat("pref_proximity_distance", 1f);
 
         return 1609 * distanceMiles;
     }

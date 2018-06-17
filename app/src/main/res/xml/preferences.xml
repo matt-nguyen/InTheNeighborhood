@@ -5,9 +5,9 @@
         android:title="Toggle GPS"
         android:summary="Turning on GPS allows you to get alerts when you're near a location"
         android:defaultValue="true"/>
-    <com.nghianguyen.intheneighborhood.ui.settings.DistancePickerPreference
-        android:key="pref_distance"
+    <com.nghianguyen.intheneighborhood.ui.settings.ProximityPickerPrefences
+        android:key="pref_proximity_distance"
         android:title="Alert Distance"
         android:summary="How close to a location you want to be notified"
-        android:defaultValue="1"/>
+        android:defaultValue="1" />
 </PreferenceScreen>

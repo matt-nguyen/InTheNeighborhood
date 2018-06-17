@@ -83,7 +83,7 @@ public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewH
         if(location == null) return;
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int proximityDistance = sharedPrefs.getInt("pref_distance", 1);
+        float proximityDistance = sharedPrefs.getFloat("pref_proximity_distance", 1f);
 
         presenter.updateNearbyTasks(location, proximityDistance);
 

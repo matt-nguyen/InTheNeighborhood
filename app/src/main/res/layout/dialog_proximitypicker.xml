@@ -14,6 +14,12 @@
             android:layout_height="100dp"
             android:layout_marginEnd="8dp"
             />
+        <NumberPicker
+            android:id="@+id/distance_decimal"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:layout_marginEnd="8dp"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
