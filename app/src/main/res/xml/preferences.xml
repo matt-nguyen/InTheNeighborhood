@@ -9,5 +9,5 @@
         android:key="pref_proximity_distance"
         android:title="Alert Distance"
         android:summary="How close to a location you want to be notified"
-        android:defaultValue="1" />
+        android:defaultValue="1"/>
 </PreferenceScreen>

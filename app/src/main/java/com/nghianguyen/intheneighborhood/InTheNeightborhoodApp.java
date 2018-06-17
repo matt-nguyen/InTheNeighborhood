@@ -5,6 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
 public class InTheNeightborhoodApp extends Application{
 
     public static final String CHANNEL_NEARBY_ALERT = "NEARBY_ALERTS";
@@ -12,6 +14,12 @@ public class InTheNeightborhoodApp extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
+
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Muli-Regular.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );
 
         createNotificationChannel();
     }

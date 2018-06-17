@@ -1,6 +1,9 @@
 package com.nghianguyen.intheneighborhood.map;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class GoogleApiConnectActivity extends AppCompatActivity {
 
@@ -21,4 +24,8 @@ public class GoogleApiConnectActivity extends AppCompatActivity {
         super.onStop();
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 }

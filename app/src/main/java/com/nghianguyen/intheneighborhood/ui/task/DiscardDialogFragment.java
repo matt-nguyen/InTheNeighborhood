@@ -38,7 +38,7 @@ public class DiscardDialogFragment extends DialogFragment {
                         dismiss();
                     }
                 })
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         listener.discardAndExit();
