@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.location.LocationManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
@@ -23,10 +24,11 @@ public class AlertReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        Toast.makeText(context, "IN HERE!!!!", Toast.LENGTH_LONG).show();
         boolean isEntering = intent.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false);
         Log.d("onReceive", "isEntering - " + isEntering);
 
-        if(isEntering){
+//        if(isEntering){
             String taskDescription = intent.getStringExtra(EXTRA_TASK_DESC);
 
             Intent taskIntent = new Intent(context, TaskActivity.class);
@@ -36,15 +38,18 @@ public class AlertReceiver extends BroadcastReceiver {
 
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, taskIntent, 0);
 
-            showNotification(context, taskDescription, pendingIntent);
-        }
+            showNotification(context, taskDescription, pendingIntent, isEntering);
+//        }
     }
 
-    private void showNotification(Context context, String content, PendingIntent pendingIntent){
+    private void showNotification(Context context, String content, PendingIntent pendingIntent, boolean isEntering){
+
+        String isEnteringText = (isEntering) ? " entering" : " not entering";
+
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
                 .setSmallIcon(android.R.drawable.ic_menu_report_image)
                 .setContentTitle(context.getString(R.string.notification_title))
-                .setContentText(content)
+                .setContentText(content + isEnteringText)
                 .setContentIntent(pendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)

@@ -117,6 +117,11 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
                 TaskActivity.this.setResult(RESULT_OK);
                 TaskActivity.this.finish();
             }
+
+            @Override
+            void toast(String msg) {
+                Toast.makeText(TaskActivity.this, "Msg - " + msg, Toast.LENGTH_LONG).show();
+            }
         };
 
         setupViewEvents();

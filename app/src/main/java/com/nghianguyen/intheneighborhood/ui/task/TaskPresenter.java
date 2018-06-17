@@ -3,6 +3,7 @@ package com.nghianguyen.intheneighborhood.ui.task;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -55,8 +56,6 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         model.removeLocation();
         view.clearLocation();
         map.clear();
-//        view.showLocationName(null);
-//        view.showLocationAddress(null);
     }
 
 
@@ -72,6 +71,8 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         }else{
             if(currentLocation != null){
                 locLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+
+//                toast("Current location - " + locLatLng.longitude + "," + locLatLng.latitude);
             }
         }
 
@@ -93,6 +94,7 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
             String placeName = place.getName().toString();
             LatLng latLng = place.getLatLng();
 
+//            toast("Selected location - " + latLng.longitude + "," + latLng.latitude);
             if(!view.isLocationNameEntered()){
                 view.showLocationName(placeName);
             }
@@ -174,4 +176,6 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
     abstract void beginSavingSnapshot();
 
     abstract void onTaskDeleted();
+
+    abstract void toast(String msg);
 }

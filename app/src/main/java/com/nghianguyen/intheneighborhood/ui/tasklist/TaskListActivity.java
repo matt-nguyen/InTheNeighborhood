@@ -1,6 +1,7 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,12 +12,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.AlarmManagerCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,6 +37,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.nghianguyen.intheneighborhood.R;
+import com.nghianguyen.intheneighborhood.alert.AlertReceiver;
 import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
@@ -208,9 +212,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
-
             presenter.updateProximityAlerts(ProximityAlertManager.get(this));
-
         }else if(requestCode == REQUEST_CODE_TASK_DELETED){
 
             if(resultCode == RESULT_OK) {

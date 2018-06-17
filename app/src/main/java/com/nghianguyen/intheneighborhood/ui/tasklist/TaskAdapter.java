@@ -59,7 +59,6 @@ public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewH
                         presenter.getTask(holder.getAdapterPosition()).getDb_id());
 
                 startActivityForResult(intent);
-//                ((Activity) context).startActivityForResult(intent, REQUEST_CODE_TASK_DELETED);
             }
         });
 
