@@ -3,7 +3,10 @@ package com.nghianguyen.intheneighborhood.alert;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
@@ -24,21 +27,26 @@ public class AlertReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Toast.makeText(context, "IN HERE!!!!", Toast.LENGTH_LONG).show();
         boolean isEntering = intent.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false);
         Log.d("onReceive", "isEntering - " + isEntering);
 
+        showNotification(context, "testing receiver", null, false);
+
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.schedule(new JobInfo.Builder(10, new ComponentName(context, ProximityService.class))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build());
 //        if(isEntering){
-            String taskDescription = intent.getStringExtra(EXTRA_TASK_DESC);
-
-            Intent taskIntent = new Intent(context, TaskActivity.class);
-
-            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
-            taskIntent.putExtra(TaskActivity.EXTRA_TASK_ID, taskId);
-
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, taskIntent, 0);
-
-            showNotification(context, taskDescription, pendingIntent, isEntering);
+//            String taskDescription = intent.getStringExtra(EXTRA_TASK_DESC);
+//
+//            Intent taskIntent = new Intent(context, TaskActivity.class);
+//
+//            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
+//            taskIntent.putExtra(TaskActivity.EXTRA_TASK_ID, taskId);
+//
+//            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, taskIntent, 0);
+//
+//            showNotification(context, taskDescription, pendingIntent, isEntering);
 //        }
     }
 

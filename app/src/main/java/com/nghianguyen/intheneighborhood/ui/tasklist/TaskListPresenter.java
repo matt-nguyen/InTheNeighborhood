@@ -90,6 +90,7 @@ public abstract class TaskListPresenter implements TaskListContract.Presenter{
 
     @Override
     public void updateProximityAlerts(ProximityAlertManager proximityAlertManager) {
+        // TODO: Should have model include a method to do this so we aren't just passing a proximityalertmanager around like this
         proximityAlertManager.updateAllProximityAlerts(model.getTasks());
     }
 

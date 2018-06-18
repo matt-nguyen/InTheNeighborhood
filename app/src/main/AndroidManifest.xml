@@ -62,6 +62,9 @@
                 <action android:name="com.nghianguyen.intheneighborhood.PROXIMITY_ALERT"/>
             </intent-filter>
         </receiver>
+        <service android:name=".alert.ProximityService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"/>
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="4d5c6e3e5fdd726145fab60e5a505ac19857bd42" />

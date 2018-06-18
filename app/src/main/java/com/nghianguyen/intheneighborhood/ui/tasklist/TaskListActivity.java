@@ -213,6 +213,21 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
             presenter.updateProximityAlerts(ProximityAlertManager.get(this));
+
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            boolean prefGps = sharedPrefs.getBoolean("pref_gps", false);
+
+            Intent intent = new Intent(this, AlertReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1000, intent, 0);
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            if(prefGps){
+                alarmManager.cancel(pendingIntent);
+                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000 * 2, pendingIntent);
+            }else{
+                alarmManager.cancel(pendingIntent);
+            }
+
         }else if(requestCode == REQUEST_CODE_TASK_DELETED){
 
             if(resultCode == RESULT_OK) {

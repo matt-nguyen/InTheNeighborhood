@@ -44,11 +44,11 @@ public class ProximityAlertManager {
     public void updateAllProximityAlerts(ArrayList<Task> tasks){
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-        if(sharedPrefs.getBoolean("pref_gps", false)){
-            addAllProximityAlerts(tasks);
-        }else{
+//        if(sharedPrefs.getBoolean("pref_gps", false)){
+//            addAllProximityAlerts(tasks);
+//        }else{
             removeAllProximityAlerts(tasks);
-        }
+//        }
 
     }
 
