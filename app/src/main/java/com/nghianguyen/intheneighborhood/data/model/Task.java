@@ -53,7 +53,7 @@ public class Task {
         if(json.has("LOCNAME")) {
             locName = json.getString("LOCNAME");
         }
-        // TODO: Test this logic when there's no lat/lng
+
         if(json.has("LAT") && json.has("LNG")) {
             double lat = json.getDouble("LAT");
             double lng = json.getDouble("LNG");

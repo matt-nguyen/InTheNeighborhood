@@ -35,7 +35,7 @@ public class TaskListItemPresenter {
         recyclerView.showContextMenuForChild(view);
     }
 
-    public void updateNearbyTasks(Location location, int proximityDistance){
+    public void updateNearbyTasks(Location location, float proximityDistance){
         List<Task> nearbyTasks = new ArrayList<>();
 
         LatLng locLatLng;

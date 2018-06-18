@@ -3,6 +3,7 @@ package com.nghianguyen.intheneighborhood.ui.task;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -20,6 +21,8 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
     private GoogleMap map;
     private MapsService mapsService;
 
+    private boolean taskDeleted = false;
+
     public TaskPresenter(TaskContract.View view, TaskModel model,
                          MapsService mapsService){
         this.view = view;
@@ -27,23 +30,32 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         this.model = model;
         this.mapsService = mapsService;
 
-        view.setPresenter(this);
-
         view.displayDescription(task.getDescription());
         view.showLocationName(task.getLocName());
+        view.showLocationAddress(task.getLocAddress());
         view.showTaskDone(task.isDone());
     }
 
     @Override
     public void setDescription(String description) {
-        if(!TextUtils.isEmpty(description)) {
             model.setDescription(description);
-        }
+    }
+
+    @Override
+    public void setLocationName(String locationName) {
+        model.setLocationName(locationName);
     }
 
     @Override
     public void markDoneStatus(boolean isDone) {
         model.toggleDone(isDone);
+    }
+
+    @Override
+    public void removePlace() {
+        model.removeLocation();
+        view.clearLocation();
+        map.clear();
     }
 
 
@@ -59,6 +71,8 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         }else{
             if(currentLocation != null){
                 locLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+
+//                toast("Current location - " + locLatLng.longitude + "," + locLatLng.latitude);
             }
         }
 
@@ -75,21 +89,29 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
     }
 
     @Override
-    public void updatePlace(Place place){
+    public void onPlaceUpdated(Place place){
         if(place != null){
             String placeName = place.getName().toString();
             LatLng latLng = place.getLatLng();
 
-            view.showLocationName(placeName);
+//            toast("Selected location - " + latLng.longitude + "," + latLng.latitude);
+            if(!view.isLocationNameEntered()){
+                view.showLocationName(placeName);
+            }
+            view.showLocationAddress(place.getAddress().toString());
 
             model.setLocation(place);
 
-            map.clear();
-            map.addMarker(new MarkerOptions().position(latLng).title(placeName));
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+            updateMapVisual(latLng, placeName);
 
             startSavingSnapshot();
         }
+    }
+
+    private void updateMapVisual(LatLng latLng, String placeName){
+        map.clear();
+        map.addMarker(new MarkerOptions().position(latLng).title(placeName));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
     }
 
     private void startSavingSnapshot(){
@@ -104,30 +126,56 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
             @Override
             public void onSnapshotReady(Bitmap bitmap) {
                 if(bitmap != null) {
-                    // Determine start of Y for cropping
-                    int height = bitmap.getHeight();
-                    int newHeight = (int) (height * 0.3);
-                    int startY = (height - newHeight) / 2;
-
-                    model.setLocMapImage(
-                            Bitmap.createBitmap(bitmap, 0, startY,
-                                    bitmap.getWidth(), newHeight)
-                    );
-
-                    // display the current indicator after snapshot
-                    mapsService.setMyLocationEnabled(map, true);
+                    model.setLocMapImage(processBitmap(bitmap));
                 }
+
+                mapsService.setMyLocationEnabled(map, true);
             }
         });
+    }
+
+    private Bitmap processBitmap(Bitmap bitmap){
+        int height = bitmap.getHeight();
+
+        int newHeight = (int) (height * 0.4);
+        int startY = (height - newHeight) / 2;
+
+        return Bitmap.createBitmap(bitmap, 0, startY, bitmap.getWidth(), newHeight);
+    }
+
+    @Override
+    public void deleteTask() {
+        model.deleteTask();
+        taskDeleted = true;
+
+        onTaskDeleted();
+    }
+
+    @Override
+    public boolean isReadyToExit() {
+        String description = model.task().getDescription();
+
+        return description != null && !TextUtils.isEmpty(description.trim());
+    }
+
+    @Override
+    public boolean isNewTask() {
+        return model.task().getDb_id() == -1;
     }
 
 
     @Override
     public void finish(){
-        model.saveTask();
+        if(!taskDeleted) {
+            model.saveTask();
+        }
         view = null;
         mapsService = null;
     }
 
     abstract void beginSavingSnapshot();
+
+    abstract void onTaskDeleted();
+
+    abstract void toast(String msg);
 }

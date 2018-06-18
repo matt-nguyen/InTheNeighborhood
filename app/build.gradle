@@ -36,6 +36,7 @@ android {
     dexOptions {
         jumboMode = true
     }
+    sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] } }
 }
 
 allprojects {
@@ -64,4 +65,5 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.7.0@aar') {
         transitive = true;
     }
+    compile 'uk.co.chrisjenx:calligraphy:2.3.0'
 }

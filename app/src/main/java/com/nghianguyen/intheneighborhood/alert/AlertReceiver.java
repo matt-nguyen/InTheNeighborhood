@@ -3,12 +3,16 @@ package com.nghianguyen.intheneighborhood.alert;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.ui.task.TaskActivity;
@@ -26,25 +30,34 @@ public class AlertReceiver extends BroadcastReceiver {
         boolean isEntering = intent.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false);
         Log.d("onReceive", "isEntering - " + isEntering);
 
-        if(isEntering){
-            String taskDescription = intent.getStringExtra(EXTRA_TASK_DESC);
+        showNotification(context, "testing receiver", null, false);
 
-            Intent taskIntent = new Intent(context, TaskActivity.class);
-
-            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
-            taskIntent.putExtra(TaskActivity.EXTRA_TASK_ID, taskId);
-
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, taskIntent, 0);
-
-            showNotification(context, taskDescription, pendingIntent);
-        }
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.schedule(new JobInfo.Builder(10, new ComponentName(context, ProximityService.class))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build());
+//        if(isEntering){
+//            String taskDescription = intent.getStringExtra(EXTRA_TASK_DESC);
+//
+//            Intent taskIntent = new Intent(context, TaskActivity.class);
+//
+//            int taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
+//            taskIntent.putExtra(TaskActivity.EXTRA_TASK_ID, taskId);
+//
+//            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, taskIntent, 0);
+//
+//            showNotification(context, taskDescription, pendingIntent, isEntering);
+//        }
     }
 
-    private void showNotification(Context context, String content, PendingIntent pendingIntent){
+    private void showNotification(Context context, String content, PendingIntent pendingIntent, boolean isEntering){
+
+        String isEnteringText = (isEntering) ? " entering" : " not entering";
+
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
                 .setSmallIcon(android.R.drawable.ic_menu_report_image)
                 .setContentTitle(context.getString(R.string.notification_title))
-                .setContentText(content)
+                .setContentText(content + isEnteringText)
                 .setContentIntent(pendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)

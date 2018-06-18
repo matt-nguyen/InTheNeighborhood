@@ -261,6 +261,9 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
         if(locLatLng != null) {
             cv.put(FIELD_LOC_LAT, locLatLng.latitude);
             cv.put(FIELD_LOC_LNG, locLatLng.longitude);
+        }else{
+            cv.putNull(FIELD_LOC_LAT);
+            cv.putNull(FIELD_LOC_LNG);
         }
 
         Bitmap locMapImage = t.getLocMapImage();
@@ -268,6 +271,8 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             locMapImage.compress(Bitmap.CompressFormat.PNG, 0, os);
             cv.put(FIELD_LOC_MAP_IMAGE, os.toByteArray());
+        }else{
+            cv.putNull(FIELD_LOC_MAP_IMAGE);
         }
 
         return cv;

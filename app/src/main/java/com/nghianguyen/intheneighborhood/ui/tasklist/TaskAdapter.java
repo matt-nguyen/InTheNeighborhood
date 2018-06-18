@@ -25,7 +25,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
+import static com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity.REQUEST_CODE_TASK_DELETED;
+
+public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
 
     private Context context;
 
@@ -56,7 +58,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID,
                         presenter.getTask(holder.getAdapterPosition()).getDb_id());
 
-                ((Activity) context).startActivityForResult(intent, 0);
+                startActivityForResult(intent);
             }
         });
 
@@ -80,7 +82,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
         if(location == null) return;
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int proximityDistance = sharedPrefs.getInt("pref_distance", 1);
+        float proximityDistance = sharedPrefs.getFloat("pref_proximity_distance", 1f);
 
         presenter.updateNearbyTasks(location, proximityDistance);
 
@@ -147,4 +149,5 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
         }
     }
 
+    abstract void startActivityForResult(Intent intent);
 }

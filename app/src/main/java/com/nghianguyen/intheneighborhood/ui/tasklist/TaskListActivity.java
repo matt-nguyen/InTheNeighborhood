@@ -1,6 +1,7 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,12 +10,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.AlarmManagerCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,6 +37,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.nghianguyen.intheneighborhood.R;
+import com.nghianguyen.intheneighborhood.alert.AlertReceiver;
 import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
@@ -49,6 +55,7 @@ import java.util.List;
 import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View{
+    public static final int REQUEST_CODE_TASK_DELETED = 100;
 
     @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
     @BindView(R.id.fab) public FloatingActionButton fab;
@@ -184,7 +191,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
                 Intent intent = new Intent(this, TaskActivity.class);
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID, task.getDb_id());
 
-                startActivityForResult(intent, 0);
+                startActivityForResult(intent, REQUEST_CODE_TASK_DELETED);
                 return true;
             case R.id.delete_task:
                 presenter.deleteTask(task);
@@ -206,6 +213,26 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
             presenter.updateProximityAlerts(ProximityAlertManager.get(this));
+
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            boolean prefGps = sharedPrefs.getBoolean("pref_gps", false);
+
+            Intent intent = new Intent(this, AlertReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1000, intent, 0);
+
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            if(prefGps){
+                alarmManager.cancel(pendingIntent);
+                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000 * 2, pendingIntent);
+            }else{
+                alarmManager.cancel(pendingIntent);
+            }
+
+        }else if(requestCode == REQUEST_CODE_TASK_DELETED){
+
+            if(resultCode == RESULT_OK) {
+                presenter.refreshTasks();
+            }
         }
     }
 
@@ -221,7 +248,12 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
     @Override
     public void showTasks(List<Task> tasks) {
         TaskListItemPresenter taskListItemPresenter = new TaskListItemPresenter(tasks, taskList);
-        mAdapter = new TaskAdapter(this, taskListItemPresenter);
+        mAdapter = new TaskAdapter(this, taskListItemPresenter){
+            @Override
+            void startActivityForResult(Intent intent) {
+                TaskListActivity.this.startActivityForResult(intent, REQUEST_CODE_TASK_DELETED);
+            }
+        };
 
         taskList.setAdapter(mAdapter);
     }

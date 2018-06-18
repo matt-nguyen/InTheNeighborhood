@@ -36,12 +36,16 @@ public class TaskDbManager {
 
     public void addTask(Task t){
         long id = dbHelper.addTask(t);
-        proximityAlertManager.addProximityAlert(t, id);
+
+        t.setDb_id((int)id);
+//        proximityAlertManager.addProximityAlert(t, id);
+        proximityAlertManager.addProximityAlert(t);
     }
 
     public void updateTask(Task t){
         long id = dbHelper.updateTask(t);
-        proximityAlertManager.addProximityAlert(t, id);
+//        proximityAlertManager.addProximityAlert(t, id);
+        proximityAlertManager.addProximityAlert(t);
     }
 
     public void deleteTask(Task t){

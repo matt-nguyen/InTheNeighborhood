@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">In The Neighborhood</string>
 
-    <string name="action_new_task">New Task!</string>
+    <string name="action_new_task">New Task</string>
     <string name="title_activity_task">Map</string>
 
     <string name="action_clear_all_tasks">Clear All</string>
@@ -13,10 +13,21 @@
     <string name="context_menu_mark_done">Mark Done</string>
     <string name="context_menu_mark_not_done">Mark Incomplete</string>
 
-    <string name="content_select_place">Select Place</string>
+    <string name="button_select_place">Select Place</string>
+    <string name="button_update_place">Update Place</string>
     <string name="content_entered_location">You are within a location</string>
 
     <string name="notification_channel_name">Nearby Alerts</string>
     <string name="notification_channel_description">Get an alert when you are nearby a task</string>
     <string name="context_menu_edit_task">Edit</string>
+    <string name="task_description_hint">Description</string>
+    <string name="task_location_hint">Location name</string>
+    <string name="task_location_address_label">Address</string>
+    <string name="task_done_label">Done?</string>
+    <string name="delete_label">Delete</string>
+    <string name="dialog_confirm_delete_title">Are you sure you want to delete?</string>
+    <string name="dialog_discard_title">Do you want to discard this reminder?</string>
+    <string name="dialog_discard_message">Your description needs to be filled out.</string>
+    <string name="dialog_dont_create_title">This reminder will not be saved without a description. Is that ok?</string>
+    <string name="button_remove_place">Remove</string>
 </resources>

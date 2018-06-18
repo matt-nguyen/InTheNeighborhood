@@ -23,14 +23,14 @@ public class TaskModel {
     }
 
     public void saveTask(){
-        if(TextUtils.isEmpty(task.getDescription()))
+        String description = task.getDescription();
+        boolean dontSave = description == null || TextUtils.isEmpty(description.trim());
+        if(dontSave)
             return;
 
         if(task.getDb_id() > -1){
-            Log.d("TESTING", "updating task");
             manager.updateTask(task);
         }else{
-            Log.d("TESTING", "adding task");
             manager.addTask(task);
         }
     }
@@ -39,23 +39,22 @@ public class TaskModel {
         task.setDescription(description);
     }
 
+    public void setLocationName(String locationName){
+        task.setLocName(locationName);
+    }
+
     public void setLocation(Place place){
         task.setLocName(place.getName().toString());
         task.setLocAddress(place.getAddress().toString());
         task.setLocLatLng(place.getLatLng());
     }
 
-//    public void setLocName(String locName){
-//        task.setLocName(locName);
-//    }
-//
-//    public void setLocAddr(String locAddr){
-//        task.setLocAddress(locAddr);
-//    }
-//
-//    public void setLocLatLng(LatLng locLatLng){
-//        task.setLocLatLng(locLatLng);
-//    }
+    public void removeLocation(){
+        task.setLocName(null);
+        task.setLocAddress(null);
+        task.setLocLatLng(null);
+        task.setLocMapImage(null);
+    }
 
     public void setLocMapImage(Bitmap locMapImage){
         task.setLocMapImage(locMapImage);
@@ -63,5 +62,9 @@ public class TaskModel {
 
     public void toggleDone(boolean isDone){
         task.setDone(isDone);
+    }
+
+    public void deleteTask(){
+        manager.deleteTask(task);
     }
 }

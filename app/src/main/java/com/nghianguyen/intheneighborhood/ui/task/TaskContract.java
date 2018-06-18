@@ -8,13 +8,19 @@ import com.google.android.gms.maps.GoogleMap;
 public interface TaskContract {
 
     interface View{
-        void setPresenter(Presenter presenter);
-
         void displayDescription(String description);
 
         void showTaskDone(boolean isDone);
 
         void showLocationName(String locName);
+
+        boolean isLocationNameEntered();
+
+        void showLocationAddress(String address);
+
+        void clearLocation();
+
+        void deleteTaskConfirmed();
     }
 
     interface Presenter{
@@ -22,13 +28,23 @@ public interface TaskContract {
 
         void pickPlace();
 
-        void updatePlace(Place place);
+        void onPlaceUpdated(Place place);
 
         void setDescription(String description);
 
+        void setLocationName(String locationName);
+
         void markDoneStatus(boolean isDone);
 
+        void removePlace();
+
         void saveSnapshot();
+
+        void deleteTask();
+
+        boolean isReadyToExit();
+
+        boolean isNewTask();
 
         void finish();
     }

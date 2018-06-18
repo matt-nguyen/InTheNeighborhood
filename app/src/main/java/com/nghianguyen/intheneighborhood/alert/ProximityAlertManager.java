@@ -23,6 +23,8 @@ public class ProximityAlertManager {
     public static final String ACTION_PROXIMITY_ALERT =
             "com.nghianguyen.intheneighborhood.PROXIMITY_ALERT";
 
+    private static final int METERS_PER_MILE = 1609;
+
     private LocationManager locationManager;
     private Context context;
 
@@ -40,19 +42,24 @@ public class ProximityAlertManager {
     }
 
     public void updateAllProximityAlerts(ArrayList<Task> tasks){
-
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-        if(sharedPrefs.getBoolean("pref_gps", false)){
-            addAllProximityAlerts(tasks);
-        }else{
+//        if(sharedPrefs.getBoolean("pref_gps", false)){
+//            addAllProximityAlerts(tasks);
+//        }else{
             removeAllProximityAlerts(tasks);
-        }
+//        }
 
     }
 
     public void addProximityAlert(Task task, long id){
         if(id > -1){
+            addTaskProximityAlert(task);
+        }
+    }
+
+    public void addProximityAlert(Task task){
+        if(task.getDb_id() > -1){
             addTaskProximityAlert(task);
         }
     }
@@ -67,7 +74,8 @@ public class ProximityAlertManager {
         if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
-            Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
+//            Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
+            Intent intent = new Intent(context, AlertReceiver.class);
             for (Task task : tasks) {
                 locationManager.removeProximityAlert(
                         PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0)
@@ -82,7 +90,8 @@ public class ProximityAlertManager {
             if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
 
-                Intent i = new Intent(ACTION_PROXIMITY_ALERT);
+//                Intent i = new Intent(ACTION_PROXIMITY_ALERT);
+                Intent i = new Intent(context, AlertReceiver.class);
                 locationManager.removeProximityAlert(
                         PendingIntent.getBroadcast(context, (int) id, i, 0)
                 );
@@ -112,7 +121,8 @@ public class ProximityAlertManager {
     }
 
     private PendingIntent buildPendingIntent(Task task){
-        Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
+//        Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
+        Intent intent = new Intent(context, AlertReceiver.class);
         intent.putExtra(AlertReceiver.EXTRA_TASK_ID, task.getDb_id());
         intent.putExtra(AlertReceiver.EXTRA_TASK_DESC, task.getDescription());
 
@@ -121,9 +131,9 @@ public class ProximityAlertManager {
 
     private float getProximityDistance(){
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int distanceMiles = sharedPrefs.getInt("pref_distance", 1);
+        float distanceMiles = sharedPrefs.getFloat("pref_proximity_distance", 1f);
 
-        return 1609 * distanceMiles;
+        return METERS_PER_MILE * distanceMiles;
     }
 
 }
