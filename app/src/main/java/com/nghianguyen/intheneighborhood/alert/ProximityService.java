@@ -14,12 +14,17 @@ import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NE
 
 public class ProximityService extends JobService {
 
-    private ProximityWork work;
+    private ProximityCheckJob work;
 
     @Override
     public boolean onStartJob(final JobParameters params) {
-        work = new ProximityWork(this, params);
-        work.startJob();
+        work = new ProximityCheckJob(getApplicationContext(), new ProximityCheckJob.Callback() {
+            @Override
+            public void jobFinished() {
+                ProximityService.this.jobFinished(params, false);
+            }
+        });
+        work.execute();
 
         return true;
     }

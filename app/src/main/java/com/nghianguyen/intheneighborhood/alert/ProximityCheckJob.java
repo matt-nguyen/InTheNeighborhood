@@ -1,66 +1,56 @@
 package com.nghianguyen.intheneighborhood.alert;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
-import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
-
-public class ProximityWork {
-
-    // TODO: ProximityWork should have callbacks so that we don't have to pass ProximityService obj in here just to call jobFinished()
-
+public class ProximityCheckJob {
     private static final String LAST_LAT = "last_location_lat";
     private static final String LAST_LNG = "last_location_lng";
 
     private static final int MIN_MOVE_DISTANCE = 1;
 
     private ProximityAlertManager proximityAlertManager;
-
-    private LocationCallback callback;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationCallback locationCallback;
 
     private Context context;
 
-    public ProximityWork(final ProximityService proximityService, final JobParameters params){
-        this.context = proximityService.getApplicationContext();
-        this.fusedLocationProviderClient = new FusedLocationProviderClient(context);
-        this.proximityAlertManager = ProximityAlertManager.get(context);
+    public ProximityCheckJob(Context context, final Callback callback){
+        this.context = context.getApplicationContext();
+        this.fusedLocationProviderClient = new FusedLocationProviderClient(this.context);
+        this.proximityAlertManager = ProximityAlertManager.get(this.context);
 
-        this.callback = new LocationCallback() {
+        this.locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+                Location updatedLocation = locationResult.getLastLocation();
 
-                processForProximity(locationResult.getLastLocation());
+                checkForProximityAlerts(updatedLocation);
+                saveLocation(updatedLocation);
 
                 cleanup();
-                proximityService.jobFinished(params, false);
 
+                callback.jobFinished();
             }
         };
     }
 
-    public void startJob(){
+    public void execute(){
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
@@ -69,37 +59,29 @@ public class ProximityWork {
                     .setFastestInterval(500)
                     .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, callback, null);
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
         }
     }
 
-    private void processForProximity(Location updatedLocation){
-        showNotification(context, "Location - " + updatedLocation.getLatitude() + ","
-                + updatedLocation.getLongitude(), 4);
+    private void checkForProximityAlerts(Location updatedLocation){
 
-        if(isEnoughMovement(updatedLocation)) {
+        if(isEnoughMovementSinceLast(updatedLocation)) {
             ArrayList<Task> tasks = TaskDbManager.get(context).getTasks();
             ArrayList<Task> withinProxyList = new ArrayList<>();
             ArrayList<Task> almostProxyList = new ArrayList<>();
 
             buildProxyLists(updatedLocation, tasks, withinProxyList, almostProxyList);
 
-            showNotification(context, "Woah. there's enough movement. Within: "
-                    + withinProxyList.size() + ", Close: " + almostProxyList.size(), 6);
-
             proximityAlertManager.addAllProximityAlerts(withinProxyList);
             proximityAlertManager.addAllProximityAlerts(almostProxyList);
         }
-
-        saveLocation(updatedLocation);
     }
 
-    private boolean isEnoughMovement(Location updatedLocation){
+    private boolean isEnoughMovementSinceLast(Location updatedLocation){
         Location previousLocation = getPreviousLocation();
 
         if(previousLocation != null) {
             float distance = previousLocation.distanceTo(updatedLocation);
-            showNotification(context, "Distance since last - " + distance, 5);
 
             return distance > MIN_MOVE_DISTANCE;
         }
@@ -145,8 +127,8 @@ public class ProximityWork {
         float latitude = sharedPrefs.getFloat(LAST_LAT, -1);
         float longitude = sharedPrefs.getFloat(LAST_LNG, -1);
 
-        boolean noLocation = latitude == -1 && longitude == -1;
-        if(noLocation){
+        boolean noPreviousLocationSaved = latitude == -1 && longitude == -1;
+        if(noPreviousLocationSaved){
             return null;
         }else{
             Location previousLocation = new Location("");
@@ -167,32 +149,17 @@ public class ProximityWork {
 
 
     public void cleanup(){
-//        showNotification(context, "Cleanup", 10);
-        if(fusedLocationProviderClient != null && callback != null){
-            fusedLocationProviderClient.removeLocationUpdates(callback);
+        if(fusedLocationProviderClient != null && locationCallback != null){
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         }
 
         fusedLocationProviderClient = null;
         proximityAlertManager = null;
-        callback = null;
+        locationCallback = null;
         context = null;
     }
 
-    private void showNotification(Context context, String content, int id){
-
-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
-                .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                .setContentTitle(context.getString(R.string.notification_title))
-                .setContentText(content)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-                .build();
-
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Log.d("onReceive", "Sending notification");
-        notificationManager.notify(id, notification);
-
+    interface Callback{
+        void jobFinished();
     }
 }

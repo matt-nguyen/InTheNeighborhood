@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.nghianguyen.intheneighborhood.data.model.Task;
@@ -74,7 +73,7 @@ public class ProximityAlertManager {
                 == PackageManager.PERMISSION_GRANTED) {
 
 //            Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
-            Intent intent = new Intent(context, ProximityCheckReceiver.class);
+            Intent intent = new Intent(context, RunProximityServiceReceiver.class);
             for (Task task : tasks) {
                 locationManager.removeProximityAlert(
                         PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0)
@@ -90,7 +89,7 @@ public class ProximityAlertManager {
                     == PackageManager.PERMISSION_GRANTED) {
 
 //                Intent i = new Intent(ACTION_PROXIMITY_ALERT);
-                Intent i = new Intent(context, ProximityCheckReceiver.class);
+                Intent i = new Intent(context, RunProximityServiceReceiver.class);
                 locationManager.removeProximityAlert(
                         PendingIntent.getBroadcast(context, (int) id, i, 0)
                 );

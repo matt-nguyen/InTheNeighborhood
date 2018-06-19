@@ -30,7 +30,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.nghianguyen.intheneighborhood.R;
-import com.nghianguyen.intheneighborhood.alert.ProximityCheckReceiver;
+import com.nghianguyen.intheneighborhood.alert.RunProximityServiceReceiver;
 import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
@@ -208,7 +208,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             boolean prefGps = sharedPrefs.getBoolean("pref_gps", false);
 
-            Intent intent = new Intent(this, ProximityCheckReceiver.class);
+            Intent intent = new Intent(this, RunProximityServiceReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1000, intent, 0);
 
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);

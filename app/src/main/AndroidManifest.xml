@@ -57,7 +57,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity" />
         </activity>
-        <receiver android:name="com.nghianguyen.intheneighborhood.alert.ProximityCheckReceiver">
+        <receiver android:name="com.nghianguyen.intheneighborhood.alert.RunProximityServiceReceiver">
             <intent-filter>
                 <action android:name="com.nghianguyen.intheneighborhood.PROXIMITY_CHECK"/>
             </intent-filter>
