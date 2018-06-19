@@ -2,14 +2,10 @@ package com.nghianguyen.intheneighborhood.alert;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.nghianguyen.intheneighborhood.R;
@@ -18,12 +14,17 @@ import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NE
 
 public class ProximityService extends JobService {
 
-    private ProximityWork work;
+    private ProximityCheckJob work;
 
     @Override
     public boolean onStartJob(final JobParameters params) {
-        work = new ProximityWork(this, params);
-        work.runJob();
+        work = new ProximityCheckJob(getApplicationContext(), new ProximityCheckJob.Callback() {
+            @Override
+            public void jobFinished() {
+                ProximityService.this.jobFinished(params, false);
+            }
+        });
+        work.execute();
 
         return true;
     }

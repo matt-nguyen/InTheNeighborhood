@@ -8,8 +8,6 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.nghianguyen.intheneighborhood.data.model.Task;
@@ -47,7 +45,7 @@ public class ProximityAlertManager {
 //        if(sharedPrefs.getBoolean("pref_gps", false)){
 //            addAllProximityAlerts(tasks);
 //        }else{
-            removeAllProximityAlerts(tasks);
+//            removeAllProximityAlerts(tasks);
 //        }
 
     }
@@ -75,7 +73,7 @@ public class ProximityAlertManager {
                 == PackageManager.PERMISSION_GRANTED) {
 
 //            Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
-            Intent intent = new Intent(context, AlertReceiver.class);
+            Intent intent = new Intent(context, RunProximityServiceReceiver.class);
             for (Task task : tasks) {
                 locationManager.removeProximityAlert(
                         PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0)
@@ -91,7 +89,7 @@ public class ProximityAlertManager {
                     == PackageManager.PERMISSION_GRANTED) {
 
 //                Intent i = new Intent(ACTION_PROXIMITY_ALERT);
-                Intent i = new Intent(context, AlertReceiver.class);
+                Intent i = new Intent(context, RunProximityServiceReceiver.class);
                 locationManager.removeProximityAlert(
                         PendingIntent.getBroadcast(context, (int) id, i, 0)
                 );
@@ -113,7 +111,7 @@ public class ProximityAlertManager {
                         task.getLocLatLng().latitude,
                         task.getLocLatLng().longitude,
                         getProximityDistance(),
-                        -1,
+                        60000 * 5,
                         pendingIntent
                 );
             }
@@ -122,9 +120,10 @@ public class ProximityAlertManager {
 
     private PendingIntent buildPendingIntent(Task task){
 //        Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
-        Intent intent = new Intent(context, AlertReceiver.class);
-        intent.putExtra(AlertReceiver.EXTRA_TASK_ID, task.getDb_id());
-        intent.putExtra(AlertReceiver.EXTRA_TASK_DESC, task.getDescription());
+        Intent intent = new Intent(context, ProximityAlertReceiver.class);
+
+        intent.putExtra(ProximityAlertReceiver.EXTRA_TASK_ID, task.getDb_id());
+        intent.putExtra(ProximityAlertReceiver.EXTRA_TASK_DESC, task.getDescription());
 
         return PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0);
     }

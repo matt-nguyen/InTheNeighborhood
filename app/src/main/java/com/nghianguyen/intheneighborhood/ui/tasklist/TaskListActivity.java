@@ -2,9 +2,6 @@ package com.nghianguyen.intheneighborhood.ui.tasklist;
 
 import android.Manifest;
 import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,15 +9,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.AlarmManagerCompat;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
@@ -37,7 +30,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.nghianguyen.intheneighborhood.R;
-import com.nghianguyen.intheneighborhood.alert.AlertReceiver;
+import com.nghianguyen.intheneighborhood.alert.RunProximityServiceReceiver;
 import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
@@ -51,8 +44,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
 import java.util.List;
-
-import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View{
     public static final int REQUEST_CODE_TASK_DELETED = 100;
@@ -217,13 +208,13 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             boolean prefGps = sharedPrefs.getBoolean("pref_gps", false);
 
-            Intent intent = new Intent(this, AlertReceiver.class);
+            Intent intent = new Intent(this, RunProximityServiceReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1000, intent, 0);
 
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             if(prefGps){
                 alarmManager.cancel(pendingIntent);
-                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000 * 2, pendingIntent);
+                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000 * 1, pendingIntent);
             }else{
                 alarmManager.cancel(pendingIntent);
             }
