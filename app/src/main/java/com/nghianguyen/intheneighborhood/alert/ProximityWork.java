@@ -27,10 +27,15 @@ import java.util.List;
 import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class ProximityWork {
+
+    // TODO: ProximityWork should have callbacks so that we don't have to pass ProximityService obj in here just to call jobFinished()
+
     private static final String LAST_LAT = "last_location_lat";
     private static final String LAST_LNG = "last_location_lng";
 
     private static final int MIN_MOVE_DISTANCE = 1;
+
+    private ProximityAlertManager proximityAlertManager;
 
     private LocationCallback callback;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -40,6 +45,7 @@ public class ProximityWork {
     public ProximityWork(final ProximityService proximityService, final JobParameters params){
         this.context = proximityService.getApplicationContext();
         this.fusedLocationProviderClient = new FusedLocationProviderClient(context);
+        this.proximityAlertManager = ProximityAlertManager.get(context);
 
         this.callback = new LocationCallback() {
             @Override
@@ -73,15 +79,16 @@ public class ProximityWork {
 
         if(isEnoughMovement(updatedLocation)) {
             ArrayList<Task> tasks = TaskDbManager.get(context).getTasks();
-            List<Task> withinProxyList = new ArrayList<>();
-            List<Task> almostProxyList = new ArrayList<>();
+            ArrayList<Task> withinProxyList = new ArrayList<>();
+            ArrayList<Task> almostProxyList = new ArrayList<>();
 
             buildProxyLists(updatedLocation, tasks, withinProxyList, almostProxyList);
 
             showNotification(context, "Woah. there's enough movement. Within: "
                     + withinProxyList.size() + ", Close: " + almostProxyList.size(), 6);
-        }else{
-            showNotification(context, "Woah. not enough movement", 6);
+
+            proximityAlertManager.addAllProximityAlerts(withinProxyList);
+            proximityAlertManager.addAllProximityAlerts(almostProxyList);
         }
 
         saveLocation(updatedLocation);
@@ -106,25 +113,26 @@ public class ProximityWork {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         float proximityDistance = sharedPrefs.getFloat("pref_proximity_distance", 1f);
 
+        LatLng locLatLng;
+        Location taskLocation;
+        float distanceFromTask;
         for (Task task : tasks) {
             if (task.isDone()) {
                 continue;
             }
-            LatLng locLatLng = task.getLocLatLng();
+
+            locLatLng = task.getLocLatLng();
+
             if(locLatLng != null){
-                Location taskLocation = new Location("");
+                taskLocation = new Location("");
                 taskLocation.setLatitude(locLatLng.latitude);
                 taskLocation.setLongitude(locLatLng.longitude);
 
-                float distanceFromTask = currentLocation.distanceTo(taskLocation) / 1609;
+                distanceFromTask = currentLocation.distanceTo(taskLocation) / 1609;
 
                 if(proximityDistance >= distanceFromTask){
-                    // ALERT THIS
-//                                withinProxyCount++;
                     withinProxyList.add(task);
                 }else if((proximityDistance + 0.5) >= distanceFromTask){
-                    // ADD PROXIMITY ALERT FOR THIS
-//                                closeToProxyCount++;
                     almostProxyList.add(task);
                 }
             }
@@ -165,6 +173,7 @@ public class ProximityWork {
         }
 
         fusedLocationProviderClient = null;
+        proximityAlertManager = null;
         callback = null;
         context = null;
     }
