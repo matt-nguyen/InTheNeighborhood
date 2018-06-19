@@ -109,13 +109,13 @@ public class ProximityAlertManager {
 
                 locationManager.removeProximityAlert(pendingIntent);
 
-                locationManager.addProximityAlert(
-                        task.getLocLatLng().latitude,
-                        task.getLocLatLng().longitude,
-                        getProximityDistance(),
-                        -1,
-                        pendingIntent
-                );
+//                locationManager.addProximityAlert(
+//                        task.getLocLatLng().latitude,
+//                        task.getLocLatLng().longitude,
+//                        getProximityDistance(),
+//                        60000 * 5,
+//                        pendingIntent
+//                );
             }
         }
     }

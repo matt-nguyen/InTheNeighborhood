@@ -223,7 +223,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             if(prefGps){
                 alarmManager.cancel(pendingIntent);
-                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000 * 2, pendingIntent);
+                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000 * 1, pendingIntent);
             }else{
                 alarmManager.cancel(pendingIntent);
             }

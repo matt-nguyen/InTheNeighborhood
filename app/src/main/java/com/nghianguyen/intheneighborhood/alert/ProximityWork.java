@@ -16,17 +16,21 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.maps.model.LatLng;
 import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class ProximityWork {
     private static final String LAST_LAT = "last_location_lat";
     private static final String LAST_LNG = "last_location_lng";
+
+    private static final int MIN_MOVE_DISTANCE = 1;
 
     private LocationCallback callback;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -40,49 +44,92 @@ public class ProximityWork {
         this.callback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                Location currentLocation = locationResult.getLastLocation();
-                showNotification(context, "Location - " + currentLocation.getLatitude() + "," + currentLocation.getLongitude(), 4);
 
-                Location previousLocation = getPreviousLocation();
-                if(previousLocation != null){
-                    showNotification(context, "Previous Location - " + previousLocation.getLatitude() + "," + previousLocation.getLongitude(), 5);
-                }else{
-                    showNotification(context, "Previous Location - NONE", 5);
-                }
+                processForProximity(locationResult.getLastLocation());
 
-//                SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-//                float distanceMiles = sharedPrefs.getFloat("pref_proximity_distance", 1f);
-//                ArrayList<Task> tasks = TaskDbManager.get(context).getTasks();
-
-                saveLocation(currentLocation);
                 cleanup();
                 proximityService.jobFinished(params, false);
+
             }
         };
     }
 
-    public void runJob(){
+    public void startJob(){
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
 
             LocationRequest locationRequest = new LocationRequest()
                     .setInterval(1000)
                     .setFastestInterval(500)
-                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                    .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, callback, null);
         }
     }
 
-    public void cleanup(){
-        showNotification(context, "Cleanup", 10);
-        if(fusedLocationProviderClient != null && callback != null){
-            fusedLocationProviderClient.removeLocationUpdates(callback);
+    private void processForProximity(Location updatedLocation){
+        showNotification(context, "Location - " + updatedLocation.getLatitude() + ","
+                + updatedLocation.getLongitude(), 4);
+
+        if(isEnoughMovement(updatedLocation)) {
+            ArrayList<Task> tasks = TaskDbManager.get(context).getTasks();
+            List<Task> withinProxyList = new ArrayList<>();
+            List<Task> almostProxyList = new ArrayList<>();
+
+            buildProxyLists(updatedLocation, tasks, withinProxyList, almostProxyList);
+
+            showNotification(context, "Woah. there's enough movement. Within: "
+                    + withinProxyList.size() + ", Close: " + almostProxyList.size(), 6);
+        }else{
+            showNotification(context, "Woah. not enough movement", 6);
         }
 
-        fusedLocationProviderClient = null;
-        callback = null;
-        context = null;
+        saveLocation(updatedLocation);
+    }
+
+    private boolean isEnoughMovement(Location updatedLocation){
+        Location previousLocation = getPreviousLocation();
+
+        if(previousLocation != null) {
+            float distance = previousLocation.distanceTo(updatedLocation);
+            showNotification(context, "Distance since last - " + distance, 5);
+
+            return distance > MIN_MOVE_DISTANCE;
+        }
+
+        return true;
+    }
+
+
+    private void buildProxyLists(Location currentLocation, ArrayList<Task> tasks,
+                                 List<Task> withinProxyList, List<Task> almostProxyList){
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        float proximityDistance = sharedPrefs.getFloat("pref_proximity_distance", 1f);
+
+        for (Task task : tasks) {
+            if (task.isDone()) {
+                continue;
+            }
+            LatLng locLatLng = task.getLocLatLng();
+            if(locLatLng != null){
+                Location taskLocation = new Location("");
+                taskLocation.setLatitude(locLatLng.latitude);
+                taskLocation.setLongitude(locLatLng.longitude);
+
+                float distanceFromTask = currentLocation.distanceTo(taskLocation) / 1609;
+
+                if(proximityDistance >= distanceFromTask){
+                    // ALERT THIS
+//                                withinProxyCount++;
+                    withinProxyList.add(task);
+                }else if((proximityDistance + 0.5) >= distanceFromTask){
+                    // ADD PROXIMITY ALERT FOR THIS
+//                                closeToProxyCount++;
+                    almostProxyList.add(task);
+                }
+            }
+
+        }
     }
 
     private Location getPreviousLocation(){
@@ -108,6 +155,18 @@ public class ProximityWork {
                 .putFloat(LAST_LAT, (float)location.getLatitude())
                 .putFloat(LAST_LNG, (float)location.getLongitude())
                 .apply();
+    }
+
+
+    public void cleanup(){
+//        showNotification(context, "Cleanup", 10);
+        if(fusedLocationProviderClient != null && callback != null){
+            fusedLocationProviderClient.removeLocationUpdates(callback);
+        }
+
+        fusedLocationProviderClient = null;
+        callback = null;
+        context = null;
     }
 
     private void showNotification(Context context, String content, int id){
