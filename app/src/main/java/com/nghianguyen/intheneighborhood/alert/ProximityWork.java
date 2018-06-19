@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class ProximityWork {
+    private static final String LAST_LAT = "last_location_lat";
+    private static final String LAST_LNG = "last_location_lng";
+
     private LocationCallback callback;
     private FusedLocationProviderClient fusedLocationProviderClient;
 
@@ -37,17 +40,21 @@ public class ProximityWork {
         this.callback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                Location lastLocation = locationResult.getLastLocation();
-                showNotification(context, "Location - " + lastLocation.getLatitude() + "," + lastLocation.getLongitude(), 4);
+                Location currentLocation = locationResult.getLastLocation();
+                showNotification(context, "Location - " + currentLocation.getLatitude() + "," + currentLocation.getLongitude(), 4);
 
-                SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-                float distanceMiles = sharedPrefs.getFloat("pref_proximity_distance", 1f);
-                showNotification(context, "distanceMiles - " + distanceMiles, 5);
+                Location previousLocation = getPreviousLocation();
+                if(previousLocation != null){
+                    showNotification(context, "Previous Location - " + previousLocation.getLatitude() + "," + previousLocation.getLongitude(), 5);
+                }else{
+                    showNotification(context, "Previous Location - NONE", 5);
+                }
 
-                ArrayList<Task> tasks = TaskDbManager.get(context).getTasks();
+//                SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+//                float distanceMiles = sharedPrefs.getFloat("pref_proximity_distance", 1f);
+//                ArrayList<Task> tasks = TaskDbManager.get(context).getTasks();
 
-                showNotification(context, "task count - " + tasks.size(), 6);
-
+                saveLocation(currentLocation);
                 cleanup();
                 proximityService.jobFinished(params, false);
             }
@@ -76,6 +83,31 @@ public class ProximityWork {
         fusedLocationProviderClient = null;
         callback = null;
         context = null;
+    }
+
+    private Location getPreviousLocation(){
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        float latitude = sharedPrefs.getFloat(LAST_LAT, -1);
+        float longitude = sharedPrefs.getFloat(LAST_LNG, -1);
+
+        boolean noLocation = latitude == -1 && longitude == -1;
+        if(noLocation){
+            return null;
+        }else{
+            Location previousLocation = new Location("");
+            previousLocation.setLatitude(latitude);
+            previousLocation.setLongitude(longitude);
+
+            return previousLocation;
+        }
+    }
+
+    private void saveLocation(Location location){
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPrefs.edit()
+                .putFloat(LAST_LAT, (float)location.getLatitude())
+                .putFloat(LAST_LNG, (float)location.getLongitude())
+                .apply();
     }
 
     private void showNotification(Context context, String content, int id){
