@@ -19,7 +19,7 @@ public interface TaskListContract {
         void refreshTasks();
         void setTaskDone(Task task, boolean isDone);
         void deleteTask(Task task);
-        void updateProximityAlerts(ProximityAlertManager proximityAlertManager);
+        void setProximityAlertsOn(boolean yes);
         void onAttach();
         void onDetach();
         void startLocationUpdates();

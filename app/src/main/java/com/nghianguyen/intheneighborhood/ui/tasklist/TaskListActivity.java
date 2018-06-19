@@ -1,8 +1,6 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,8 +28,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.nghianguyen.intheneighborhood.R;
-import com.nghianguyen.intheneighborhood.alert.RunProximityServiceReceiver;
-import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
+import com.nghianguyen.intheneighborhood.core.ProximityServiceAlarmManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.TaskOpenHelper;
@@ -72,7 +69,9 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             }
         });
 
-        TaskListModel model = new TaskListModel(TaskDbManager.get(this), new FusedLocationProviderClient(this));
+        TaskListModel model = new TaskListModel(TaskDbManager.get(this),
+                new FusedLocationProviderClient(this),
+                ProximityServiceAlarmManager.get(this));
 
         presenter = new TaskListPresenter(this, model){
             @Override
@@ -137,7 +136,6 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
                 startActivity(new Intent(this, TaskActivity.class));
                 return true;
             case R.id.action_clear_all_tasks:
-                // Delete all tasks
                 TaskDbManager.get(this).clearTasks();
                 return true;
             case R.id.action_settings:
@@ -203,21 +201,10 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
-            presenter.updateProximityAlerts(ProximityAlertManager.get(this));
-
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            boolean prefGps = sharedPrefs.getBoolean("pref_gps", false);
+            boolean gpsAlertsOn = sharedPrefs.getBoolean("pref_gps", false);
 
-            Intent intent = new Intent(this, RunProximityServiceReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1000, intent, 0);
-
-            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-            if(prefGps){
-                alarmManager.cancel(pendingIntent);
-                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000 * 1, pendingIntent);
-            }else{
-                alarmManager.cancel(pendingIntent);
-            }
+            presenter.setProximityAlertsOn(gpsAlertsOn);
 
         }else if(requestCode == REQUEST_CODE_TASK_DELETED){
 

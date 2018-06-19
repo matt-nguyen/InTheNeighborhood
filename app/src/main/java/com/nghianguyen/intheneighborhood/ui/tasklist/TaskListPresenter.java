@@ -4,7 +4,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.util.List;
@@ -74,6 +73,11 @@ public abstract class TaskListPresenter implements TaskListContract.Presenter{
     }
 
     @Override
+    public void setProximityAlertsOn(boolean yes) {
+        model.setProximityAlarmOn(yes);
+    }
+
+    @Override
     public void startLocationUpdates() {
         startLocationUpdates(model.getFusedLocationProviderClient(), locationRequest, locationCallback);
     }
@@ -86,12 +90,6 @@ public abstract class TaskListPresenter implements TaskListContract.Presenter{
     @Override
     public void stopLocationUpdates() {
         model.getFusedLocationProviderClient().removeLocationUpdates(locationCallback);
-    }
-
-    @Override
-    public void updateProximityAlerts(ProximityAlertManager proximityAlertManager) {
-        // TODO: Should have model include a method to do this so we aren't just passing a proximityalertmanager around like this
-        proximityAlertManager.updateAllProximityAlerts(model.getTasks());
     }
 
     @Override
