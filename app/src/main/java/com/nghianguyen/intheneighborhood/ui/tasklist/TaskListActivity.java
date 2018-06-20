@@ -68,7 +68,8 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(TaskListActivity.this, TaskActivity.class));
+                startActivityForResult(new Intent(TaskListActivity.this, TaskActivity.class),
+                        REQUEST_CODE_TASK_DELETED);
             }
         });
 
@@ -116,7 +117,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
         switch (item.getItemId()){
             case R.id.action_new_task:
-                startActivity(new Intent(this, TaskActivity.class));
+                startActivityForResult(new Intent(this, TaskActivity.class), REQUEST_CODE_TASK_DELETED);
                 return true;
             case R.id.action_clear_all_tasks:
                 TaskDbManager.get(this).clearTasks();

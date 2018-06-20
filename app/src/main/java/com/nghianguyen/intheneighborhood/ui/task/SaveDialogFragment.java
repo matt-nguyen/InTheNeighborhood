@@ -10,7 +10,8 @@ import android.support.v7.app.AlertDialog;
 
 import com.nghianguyen.intheneighborhood.R;
 
-public class SaveChangesDialogFragment extends DialogFragment {
+public class SaveDialogFragment extends DialogFragment {
+    private static final String EXTRA_DIALOG = "dialog";
 
     private Listener listener;
 
@@ -26,11 +27,22 @@ public class SaveChangesDialogFragment extends DialogFragment {
         super.onDetach();
     }
 
+    public static SaveDialogFragment newInstance(int stringId){
+        Bundle args = new Bundle();
+        args.putInt(EXTRA_DIALOG, stringId);
+
+        SaveDialogFragment fragment = new SaveDialogFragment();
+        fragment.setArguments(args);
+
+        return fragment;
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        int titleStringId = getArguments().getInt(EXTRA_DIALOG, R.string.dialog_save_changes_title);
         return new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.dialog_save_changes_title)
+                .setTitle(titleStringId)
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

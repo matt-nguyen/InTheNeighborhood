@@ -35,4 +35,5 @@
     <string name="dialog_location_permission_no">No need</string>
     <string name="dialog_location_permission_yes">I\'ll allow it</string>
     <string name="dialog_save_changes_title">Do you want to save changes?</string>
+    <string name="dialog_save_new_title">Do you want to save your new memo?</string>
 </resources>

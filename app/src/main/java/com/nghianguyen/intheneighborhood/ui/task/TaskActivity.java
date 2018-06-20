@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
 
 public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback,
         MapsService, TaskContract.View, DontCreateDialogFragment.Listener,
-        DiscardDialogFragment.Listener, SaveChangesDialogFragment.Listener{
+        DiscardDialogFragment.Listener, SaveDialogFragment.Listener{
 
     public static final String EXTRA_TASK_ID = "task_id";
 
@@ -51,7 +51,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     private TaskContract.Presenter presenter;
 
     private boolean hasBeenEdited = false;
-    private boolean hardBackButtonPressed = true;
+    private boolean softBackButtonPressed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,35 +92,47 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     @Override
     public void onBackPressed() {
         if(presenter.isSaveable()) {
-            if(hardBackButtonPressed){
-                boolean existingTaskHasBeenChanged = !presenter.isNewTask() && hasBeenEdited;
-                if(existingTaskHasBeenChanged){
-                    new SaveChangesDialogFragment().show(getSupportFragmentManager(), "save_changes");
-                }else{
-                    super.onBackPressed();
-                }
-            }else{
+            if(softBackButtonPressed){
                 presenter.saveTask();
                 super.onBackPressed();
+            }else{
+                onHardBackButtonPressed();
             }
+            
         }else{
             showAlert();
         }
+
+        softBackButtonPressed = false;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
-                if(presenter.isSaveable()){
-                    hardBackButtonPressed = false;
-                    onBackPressed();
-                }else{
-                    showAlert();
-                }
+                onSoftBackButtonPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+    
+    private void onSoftBackButtonPressed(){
+        softBackButtonPressed = true;
+        onBackPressed();
+    }
+    
+    private void onHardBackButtonPressed(){
+        if(presenter.isNewTask()){
+            SaveDialogFragment.newInstance(R.string.dialog_save_new_title)
+                    .show(getSupportFragmentManager(), "save_new");
+        }else{
+            if(hasBeenEdited){
+                SaveDialogFragment.newInstance(R.string.dialog_save_changes_title)
+                        .show(getSupportFragmentManager(), "save_changes");
+            }else{
+                super.onBackPressed();
+            }
         }
     }
 
@@ -340,7 +352,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
     private void showAlert(){
         if(presenter.isNewTask()) {
-            new DontCreateDialogFragment().show(getSupportFragmentManager(), "dontcreate");
+            new DontCreateDialogFragment().show(getSupportFragmentManager(), "dont_create");
         }else{
             new DiscardDialogFragment().show(getSupportFragmentManager(), "discard");
         }
