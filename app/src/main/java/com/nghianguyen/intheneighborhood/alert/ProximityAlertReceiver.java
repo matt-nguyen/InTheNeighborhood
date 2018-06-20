@@ -48,10 +48,6 @@ public class ProximityAlertReceiver  extends BroadcastReceiver {
 
     private void showNotification(Context context, int taskId, String content, PendingIntent pendingIntent, boolean isEntering) {
 
-//        String isEnteringText = (isEntering) ? " entering" : " not entering";
-//
-//        content += isEnteringText + " " + taskId;
-
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
                 .setSmallIcon(android.R.drawable.ic_menu_report_image)
                 .setContentTitle(context.getString(R.string.notification_title))

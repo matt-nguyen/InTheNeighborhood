@@ -18,9 +18,6 @@ public class ProximityAlertManager {
 
     private static ProximityAlertManager proximityAlertManager;
 
-    public static final String ACTION_PROXIMITY_ALERT =
-            "com.nghianguyen.intheneighborhood.PROXIMITY_ALERT";
-
     private static final int METERS_PER_MILE = 1609;
 
     private LocationManager locationManager;
@@ -39,16 +36,16 @@ public class ProximityAlertManager {
         return proximityAlertManager;
     }
 
-    public void updateAllProximityAlerts(ArrayList<Task> tasks){
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-
+//    public void updateAllProximityAlerts(ArrayList<Task> tasks){
+//        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+//
 //        if(sharedPrefs.getBoolean("pref_gps", false)){
 //            addAllProximityAlerts(tasks);
 //        }else{
 //            removeAllProximityAlerts(tasks);
 //        }
-
-    }
+//
+//    }
 
     public void addProximityAlert(Task task, long id){
         if(id > -1){
@@ -65,36 +62,6 @@ public class ProximityAlertManager {
     public void addAllProximityAlerts(ArrayList<Task> tasks){
         for (Task task : tasks) {
                 addTaskProximityAlert(task);
-        }
-    }
-
-    public void removeAllProximityAlerts(ArrayList<Task> tasks){
-        if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-
-//            Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
-            Intent intent = new Intent(context, RunProximityServiceReceiver.class);
-            for (Task task : tasks) {
-                locationManager.removeProximityAlert(
-                        PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0)
-                );
-            }
-        }
-    }
-
-    public void removeProximityAlert(Task t, long id){
-        LatLng locLatLng = t.getLocLatLng();
-        if(id > -1 && locLatLng != null){
-            if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-
-//                Intent i = new Intent(ACTION_PROXIMITY_ALERT);
-                Intent i = new Intent(context, RunProximityServiceReceiver.class);
-                locationManager.removeProximityAlert(
-                        PendingIntent.getBroadcast(context, (int) id, i, 0)
-                );
-
-            }
         }
     }
 
@@ -118,8 +85,35 @@ public class ProximityAlertManager {
         }
     }
 
+    public void removeAllProximityAlerts(ArrayList<Task> tasks){
+        if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+
+            Intent intent = new Intent(context, RunProximityServiceReceiver.class);
+            for (Task task : tasks) {
+                locationManager.removeProximityAlert(
+                        PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0)
+                );
+            }
+        }
+    }
+
+    public void removeProximityAlert(Task t, long id){
+        LatLng locLatLng = t.getLocLatLng();
+        if(id > -1 && locLatLng != null){
+            if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+
+                Intent i = new Intent(context, RunProximityServiceReceiver.class);
+                locationManager.removeProximityAlert(
+                        PendingIntent.getBroadcast(context, (int) id, i, 0)
+                );
+
+            }
+        }
+    }
+
     private PendingIntent buildPendingIntent(Task task){
-//        Intent intent = new Intent(ACTION_PROXIMITY_ALERT);
         Intent intent = new Intent(context, ProximityAlertReceiver.class);
 
         intent.putExtra(ProximityAlertReceiver.EXTRA_TASK_ID, task.getDb_id());

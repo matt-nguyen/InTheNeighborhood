@@ -1,8 +1,6 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +15,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,12 +23,9 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.nghianguyen.intheneighborhood.R;
-import com.nghianguyen.intheneighborhood.alert.RunProximityServiceReceiver;
-import com.nghianguyen.intheneighborhood.alert.ProximityAlertManager;
+import com.nghianguyen.intheneighborhood.core.ProximityServiceAlarmManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.TaskOpenHelper;
@@ -45,17 +39,24 @@ import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
 import java.util.List;
 
-public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View{
+public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View,
+        DeviceLocationPermissionsFragment.Listener{
     public static final int REQUEST_CODE_TASK_DELETED = 100;
 
     @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
     @BindView(R.id.fab) public FloatingActionButton fab;
 
     private TaskAdapter mAdapter;
-
-    private BroadcastReceiver receiver;
-
     private TaskListContract.Presenter presenter;
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(presenter != null){
+                presenter.refreshTasks();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,38 +69,19 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(TaskListActivity.this, TaskActivity.class));
-
             }
         });
 
-        TaskListModel model = new TaskListModel(TaskDbManager.get(this), new FusedLocationProviderClient(this));
+        TaskListModel model = new TaskListModel(TaskDbManager.get(this),
+                new FusedLocationProviderClient(this),
+                ProximityServiceAlarmManager.get(this));
 
-        presenter = new TaskListPresenter(this, model){
-            @Override
-            void startLocationUpdates(FusedLocationProviderClient fusedLocationProviderClient,
-                                      LocationRequest locationRequest, LocationCallback locationCallback) {
-                TaskListActivity.this.startLocationUpdates(fusedLocationProviderClient, locationRequest,
-                        locationCallback);
-            }
-        };
+        presenter = new TaskListPresenter(this, model);
 
-        taskList.setLayoutManager(new LinearLayoutManager(this));
-
-        registerForContextMenu(taskList);
-
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if(presenter != null){
-                    presenter.refreshTasks();
-                }
-            }
-        };
-
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean needToCheck = sharedPrefs.getBoolean("need_permissions_check", true);
+        if(needToCheck) {
+            checkPermissions();
         }
     }
 
@@ -137,7 +119,6 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
                 startActivity(new Intent(this, TaskActivity.class));
                 return true;
             case R.id.action_clear_all_tasks:
-                // Delete all tasks
                 TaskDbManager.get(this).clearTasks();
                 return true;
             case R.id.action_settings:
@@ -203,24 +184,12 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SettingsActivity.REQUEST_CODE){
-            presenter.updateProximityAlerts(ProximityAlertManager.get(this));
-
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            boolean prefGps = sharedPrefs.getBoolean("pref_gps", false);
+            boolean gpsAlertsOn = sharedPrefs.getBoolean("pref_gps", false);
 
-            Intent intent = new Intent(this, RunProximityServiceReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1000, intent, 0);
-
-            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-            if(prefGps){
-                alarmManager.cancel(pendingIntent);
-                alarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000 * 1, pendingIntent);
-            }else{
-                alarmManager.cancel(pendingIntent);
-            }
+            presenter.setProximityAlertsOn(gpsAlertsOn);
 
         }else if(requestCode == REQUEST_CODE_TASK_DELETED){
-
             if(resultCode == RESULT_OK) {
                 presenter.refreshTasks();
             }
@@ -231,7 +200,9 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(grantResults.length > 0){
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Log.d("onRequestPermissionsRe", "ACCESS_FINE_LOCATION access granted");
+                presenter.setProximityAlertsOn(true);
+            }else{
+                displayPermissionsWarning();
             }
         }
     }
@@ -246,7 +217,9 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             }
         };
 
+        taskList.setLayoutManager(new LinearLayoutManager(this));
         taskList.setAdapter(mAdapter);
+        registerForContextMenu(taskList);
     }
 
     @Override
@@ -270,13 +243,28 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         }
     }
 
-    private void startLocationUpdates(FusedLocationProviderClient fusedLocationProviderClient,
-                                      LocationRequest locationRequest, LocationCallback locationCallback){
-
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED){
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    private void checkPermissions(){
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
+    }
 
+    private void displayPermissionsWarning(){
+        new DeviceLocationPermissionsFragment().show(getSupportFragmentManager(), "device_location_permissions");
+    }
+
+    @Override
+    public void permissionNotAllowed() {
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPrefs.edit()
+                .putBoolean("need_permissions_check", false)
+                .apply();
+    }
+
+    @Override
+    public void callPermissionsRequest() {
+        checkPermissions();
     }
 }
