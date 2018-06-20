@@ -8,7 +8,7 @@ import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.util.List;
 
-public abstract class TaskListPresenter implements TaskListContract.Presenter{
+public class TaskListPresenter implements TaskListContract.Presenter{
 
     private TaskListContract.View view;
     private TaskListModel model;
@@ -23,7 +23,7 @@ public abstract class TaskListPresenter implements TaskListContract.Presenter{
         this.model = model;
 
         locationRequest = new LocationRequest()
-                .setInterval(10 * 1000)
+                .setInterval(1000)
                 .setFastestInterval(500)
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
@@ -79,7 +79,7 @@ public abstract class TaskListPresenter implements TaskListContract.Presenter{
 
     @Override
     public void startLocationUpdates() {
-        startLocationUpdates(model.getFusedLocationProviderClient(), locationRequest, locationCallback);
+        model.startLocationUpdates(locationRequest, locationCallback);
     }
 
     @Override
@@ -89,7 +89,7 @@ public abstract class TaskListPresenter implements TaskListContract.Presenter{
 
     @Override
     public void stopLocationUpdates() {
-        model.getFusedLocationProviderClient().removeLocationUpdates(locationCallback);
+        model.stopLocationUpdates(locationCallback);
     }
 
     @Override
@@ -97,7 +97,4 @@ public abstract class TaskListPresenter implements TaskListContract.Presenter{
         view = null;
     }
 
-    abstract void startLocationUpdates(FusedLocationProviderClient fusedLocationProviderClient,
-                                            LocationRequest locationRequest,
-                                            LocationCallback locationCallback);
 }

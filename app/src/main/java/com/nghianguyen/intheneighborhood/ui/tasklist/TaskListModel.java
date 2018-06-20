@@ -1,6 +1,12 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.support.v4.content.ContextCompat;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
 import com.nghianguyen.intheneighborhood.core.ProximityServiceAlarmManager;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
@@ -20,19 +26,10 @@ public class TaskListModel {
         this.proximityServiceAlarmManager = proximityServiceAlarmManager;
     }
 
-    public FusedLocationProviderClient getFusedLocationProviderClient(){
-        return fusedLocationProviderClient;
-    }
-
-    public void setProximityAlarmOn(boolean yes){
-        proximityServiceAlarmManager.setAlarmOn(yes);
-    }
 
     public ArrayList<Task> getTasks(){
         return taskManager.getTasks();
     }
-
-
 
     public void updateTask(Task task){
         taskManager.updateTask(task);
@@ -42,6 +39,20 @@ public class TaskListModel {
         taskManager.deleteTask(task);
     }
 
+    public void startLocationUpdates(LocationRequest locationRequest, LocationCallback locationCallback){
+        Context context = fusedLocationProviderClient.getApplicationContext();
+        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        }
+    }
 
+    public void stopLocationUpdates(LocationCallback locationCallback){
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+    }
+
+    public void setProximityAlarmOn(boolean yes){
+        proximityServiceAlarmManager.setAlarmOn(yes);
+    }
 
 }

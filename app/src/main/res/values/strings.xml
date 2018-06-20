@@ -30,4 +30,8 @@
     <string name="dialog_discard_message">Your description needs to be filled out.</string>
     <string name="dialog_dont_create_title">This reminder will not be saved without a description. Is that ok?</string>
     <string name="button_remove_place">Remove</string>
+    <string name="dialog_location_permission_title">Location permission required</string>
+    <string name="dialog_location_permission_message">This app needs device location permissions granted, otherwise you won\'t be able to get nearby alerts.</string>
+    <string name="dialog_location_permission_no">No need</string>
+    <string name="dialog_location_permission_yes">I\'ll allow it</string>
 </resources>

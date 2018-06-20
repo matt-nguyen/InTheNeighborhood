@@ -12,16 +12,16 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_itn"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:hardwareAccelerated="true"
         android:name=".InTheNeightborhoodApp">
         <activity
-            android:name="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity"
+            android:name="com.nghianguyen.intheneighborhood.SplashActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme"
+            android:theme="@style/SplashTheme"
             android:screenOrientation="portrait"
             android:launchMode="singleTop">
             <intent-filter>
@@ -29,6 +29,18 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

@@ -1,22 +1,30 @@
 package com.nghianguyen.intheneighborhood.alert;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
+import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.data.TaskDbManager;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class ProximityCheckJob {
     private static final String LAST_LAT = "last_location_lat";
@@ -29,11 +37,13 @@ public class ProximityCheckJob {
     private LocationCallback locationCallback;
 
     private Context context;
+    private Callback callback;
 
     public ProximityCheckJob(Context context, final Callback callback){
         this.context = context.getApplicationContext();
         this.fusedLocationProviderClient = new FusedLocationProviderClient(this.context);
         this.proximityAlertManager = ProximityAlertManager.get(this.context);
+        this.callback = callback;
 
         this.locationCallback = new LocationCallback() {
             @Override
@@ -60,6 +70,9 @@ public class ProximityCheckJob {
                     .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        }else{
+            cleanup();
+            callback.jobFinished();
         }
     }
 
@@ -95,30 +108,30 @@ public class ProximityCheckJob {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         float proximityDistance = sharedPrefs.getFloat("pref_proximity_distance", 1f);
 
-        LatLng locLatLng;
-        Location taskLocation;
-        float distanceFromTask;
         for (Task task : tasks) {
-            if (task.isDone()) {
-                continue;
+            determineTask(task, proximityDistance, currentLocation,
+                    withinProxyList, almostProxyList);
+        }
+    }
+
+    private void determineTask(Task task, float proximityDistance, Location currentLocation,
+                               List<Task> withinProxyList, List<Task> almostProxyList){
+        if (task.isDone()) {
+            return;
+        }
+
+        LatLng locLatLng = task.getLocLatLng();
+
+        if(locLatLng != null){
+            Location taskLocation = buildLocation(locLatLng.latitude, locLatLng.longitude);
+
+            float distanceFromTask = currentLocation.distanceTo(taskLocation) / 1609;
+
+            if(proximityDistance >= distanceFromTask){
+                withinProxyList.add(task);
+            }else if((proximityDistance + 0.5) >= distanceFromTask){
+                almostProxyList.add(task);
             }
-
-            locLatLng = task.getLocLatLng();
-
-            if(locLatLng != null){
-                taskLocation = new Location("");
-                taskLocation.setLatitude(locLatLng.latitude);
-                taskLocation.setLongitude(locLatLng.longitude);
-
-                distanceFromTask = currentLocation.distanceTo(taskLocation) / 1609;
-
-                if(proximityDistance >= distanceFromTask){
-                    withinProxyList.add(task);
-                }else if((proximityDistance + 0.5) >= distanceFromTask){
-                    almostProxyList.add(task);
-                }
-            }
-
         }
     }
 
@@ -131,11 +144,7 @@ public class ProximityCheckJob {
         if(noPreviousLocationSaved){
             return null;
         }else{
-            Location previousLocation = new Location("");
-            previousLocation.setLatitude(latitude);
-            previousLocation.setLongitude(longitude);
-
-            return previousLocation;
+            return buildLocation(latitude, longitude);
         }
     }
 
@@ -158,6 +167,33 @@ public class ProximityCheckJob {
         locationCallback = null;
         context = null;
     }
+
+    private Location buildLocation(double latitude, double longitude){
+        Location location = new Location("");
+        location.setLatitude(latitude);
+        location.setLongitude(longitude);
+
+        return location;
+    }
+
+    private void showNotification(Context context, int taskId, String content) {
+
+        Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
+                .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                .setContentTitle(context.getString(R.string.notification_title))
+                .setContentText(content)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .build();
+
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Log.d("onReceive", "Sending notification");
+        notificationManager.notify(taskId + 20, notification);
+
+    }
+
 
     interface Callback{
         void jobFinished();
