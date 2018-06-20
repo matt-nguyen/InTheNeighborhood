@@ -15,7 +15,7 @@
         card_view:contentPaddingLeft="0dp"
         card_view:contentPaddingRight="0dp"
         card_view:contentPaddingTop="0dp"
-        card_view:contentPaddingBottom="-8dp"
+        card_view:contentPaddingBottom="-4dp"
         card_view:cardUseCompatPadding="true"
         card_view:cardPreventCornerOverlap="false"
         >
@@ -93,7 +93,7 @@
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
+                    android:paddingBottom="8dp"
                     android:gravity="center_vertical"
                     android:visibility="gone">
                     <ImageView
