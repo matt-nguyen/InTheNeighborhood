@@ -1,6 +1,5 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,8 +24,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity.REQUEST_CODE_TASK_DELETED;
-
 public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
 
     private Context context;
@@ -42,7 +39,7 @@ public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewH
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-        View taskView = inflater.inflate(R.layout.item_task2, parent, false);
+        View taskView = inflater.inflate(R.layout.item_task, parent, false);
         Log.d("onCreateViewHolder", "layout inflated");
         return new ViewHolder(taskView);
     }
@@ -95,18 +92,19 @@ public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewH
         @BindView(R.id.locNameTextView) public TextView locNameTextView;
         @BindView(R.id.locAddrTextView) public TextView locAddrTextView;
         @BindView(R.id.locMapImageView) public ImageView locMapImageView;
-        @BindView(R.id.nearby_indicator) public View nearbyView;
+        @BindView(R.id.close_indicator) public View nearbyView;
+//        @BindView(R.id.nearby_indicator) public View nearbyView;
 
         private TaskListItemPresenter presenter;
 
         public ViewHolder(View v){
             super(v);
             ButterKnife.bind(this, v);
-            descriptionTextView = v.findViewById(R.id.descriptionTextView);
-            locNameTextView = v.findViewById(R.id.locNameTextView);
-            locAddrTextView = v.findViewById(R.id.locAddrTextView);
-            locMapImageView = v.findViewById(R.id.locMapImageView);
-            nearbyView = v.findViewById(R.id.nearby_indicator);
+//            descriptionTextView = v.findViewById(R.id.descriptionTextView);
+//            locNameTextView = v.findViewById(R.id.locNameTextView);
+//            locAddrTextView = v.findViewById(R.id.locAddrTextView);
+//            locMapImageView = v.findViewById(R.id.locMapImageView);
+//            nearbyView = v.findViewById(R.id.nearby_indicator);
 
             setClickEvents();
         }

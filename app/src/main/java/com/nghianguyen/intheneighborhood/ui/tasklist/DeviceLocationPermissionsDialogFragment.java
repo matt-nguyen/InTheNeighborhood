@@ -10,7 +10,7 @@ import android.support.v7.app.AlertDialog;
 
 import com.nghianguyen.intheneighborhood.R;
 
-public class DeviceLocationPermissionsFragment extends DialogFragment{
+public class DeviceLocationPermissionsDialogFragment extends DialogFragment{
 
     private Listener listener;
 

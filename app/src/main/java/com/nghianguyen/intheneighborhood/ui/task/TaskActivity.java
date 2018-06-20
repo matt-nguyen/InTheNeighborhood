@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
 
 public class TaskActivity extends GoogleApiConnectActivity implements OnMapReadyCallback,
         MapsService, TaskContract.View, DontCreateDialogFragment.Listener,
-        DiscardDialogFragment.Listener{
+        DiscardDialogFragment.Listener, SaveDialogFragment.Listener{
 
     public static final String EXTRA_TASK_ID = "task_id";
 
@@ -50,16 +50,14 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
     private TaskContract.Presenter presenter;
 
+    private boolean hasBeenEdited = false;
+    private boolean softBackButtonPressed = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
         ButterKnife.bind(this);
-
-        ActionBar supportActionBar = getSupportActionBar();
-        if(supportActionBar != null){
-            supportActionBar.setTitle("Task");
-        }
 
         Intent intent = getIntent();
         int taskId = -1;
@@ -67,34 +65,76 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             taskId = intent.getIntExtra(EXTRA_TASK_ID, -1);
 
             if(taskId == -1) {
-                deleteButton.setVisibility(View.GONE);
+                deleteButton.setVisibility(View.INVISIBLE);
+            }
+
+            ActionBar supportActionBar = getSupportActionBar();
+            if(supportActionBar != null){
+                supportActionBar.setTitle(
+                        (taskId == -1) ? "New Memo" : "Memo"
+                );
+                toggleBackButton(true);
             }
         }
 
         setup(taskId);
     }
 
+    private void toggleBackButton(boolean showBackButton){
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null) {
+            if (showBackButton) {
+                supportActionBar.setHomeAsUpIndicator(null);
+            }else{
+                supportActionBar.setHomeAsUpIndicator(R.drawable.ic_check_white_24dp);
+            }
+        }
+    }
+
     @Override
     public void onBackPressed() {
-        if(presenter.isReadyToExit()) {
-            super.onBackPressed();
+        if(presenter.isSaveable()) {
+            if(softBackButtonPressed){
+                presenter.saveTask();
+                super.onBackPressed();
+            }else{
+                onHardBackButtonPressed();
+            }
+            
         }else{
             showAlert();
         }
+
+        softBackButtonPressed = false;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
-                if(presenter.isReadyToExit()){
-                    onBackPressed();
-                }else{
-                    showAlert();
-                }
+                onSoftBackButtonPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+    
+    private void onSoftBackButtonPressed(){
+        softBackButtonPressed = true;
+        onBackPressed();
+    }
+    
+    private void onHardBackButtonPressed(){
+        if(presenter.isNewTask()){
+            SaveDialogFragment.newInstance(R.string.dialog_save_new_title)
+                    .show(getSupportFragmentManager(), "save_new");
+        }else{
+            if(hasBeenEdited){
+                SaveDialogFragment.newInstance(R.string.dialog_save_changes_title)
+                        .show(getSupportFragmentManager(), "save_changes");
+            }else{
+                super.onBackPressed();
+            }
         }
     }
 
@@ -134,20 +174,33 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             @Override
             public void afterTextChanged(Editable s) {
                 presenter.setDescription(s.toString());
+
+                boolean descriptionNotEmpty = !TextUtils.isEmpty(s.toString());
+                if(descriptionNotEmpty){
+                    toggleBackButton(false);
+                }else{
+                    toggleBackButton(true);
+                }
+
+                hasBeenEdited = true;
             }
         });
 
         locationName.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
+                hasBeenEdited = true;
                 presenter.setLocationName(s.toString());
+                toggleBackButton(false);
             }
         });
 
         isDoneCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                hasBeenEdited = true;
                 presenter.markDoneStatus(b);
+                toggleBackButton(false);
             }
         });
 
@@ -168,6 +221,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         removePlaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hasBeenEdited = true;
                 presenter.removePlace();
             }
         });
@@ -218,6 +272,9 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
             Place place = PlacePicker.getPlace(this, data);
             presenter.onPlaceUpdated(place);
             removePlaceButton.setVisibility(View.VISIBLE);
+
+            toggleBackButton(false);
+            hasBeenEdited = true;
         }
     }
 
@@ -297,7 +354,7 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
     private void showAlert(){
         if(presenter.isNewTask()) {
-            new DontCreateDialogFragment().show(getSupportFragmentManager(), "dontcreate");
+            new DontCreateDialogFragment().show(getSupportFragmentManager(), "dont_create");
         }else{
             new DiscardDialogFragment().show(getSupportFragmentManager(), "discard");
         }
@@ -311,5 +368,13 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
     @Override
     public void discardAndExit() {
         presenter.deleteTask();
+    }
+
+    @Override
+    public void saveChanges(boolean yes) {
+        if(yes){
+            presenter.saveTask();
+        }
+        finish();
     }
 }

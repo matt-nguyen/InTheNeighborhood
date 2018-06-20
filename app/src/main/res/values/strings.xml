@@ -1,20 +1,20 @@
 <resources>
     <string name="app_name">In The Neighborhood</string>
 
-    <string name="action_new_task">New Task</string>
+    <string name="action_new_task">New Memo</string>
     <string name="title_activity_task">Map</string>
 
     <string name="action_clear_all_tasks">Clear All</string>
     <string name="action_settings">Settings</string>
 
-    <string name="notification_title">You are nearby a task!</string>
+    <string name="notification_title">You are nearby!</string>
 
     <string name="context_menu_delete_task">Delete</string>
     <string name="context_menu_mark_done">Mark Done</string>
     <string name="context_menu_mark_not_done">Mark Incomplete</string>
 
-    <string name="button_select_place">Select Place</string>
-    <string name="button_update_place">Update Place</string>
+    <string name="button_select_place">Select Location</string>
+    <string name="button_update_place">Edit</string>
     <string name="content_entered_location">You are within a location</string>
 
     <string name="notification_channel_name">Nearby Alerts</string>
@@ -34,4 +34,7 @@
     <string name="dialog_location_permission_message">This app needs device location permissions granted, otherwise you won\'t be able to get nearby alerts.</string>
     <string name="dialog_location_permission_no">No need</string>
     <string name="dialog_location_permission_yes">I\'ll allow it</string>
+    <string name="dialog_save_changes_title">Do you want to save changes?</string>
+    <string name="dialog_save_new_title">Do you want to save your new memo?</string>
+    <string name="close_indicator_text">You\'re close!</string>
 </resources>

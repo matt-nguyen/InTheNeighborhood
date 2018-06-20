@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.view.ContextMenu;
@@ -40,7 +41,7 @@ import io.fabric.sdk.android.Fabric;
 import java.util.List;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View,
-        DeviceLocationPermissionsFragment.Listener{
+        DeviceLocationPermissionsDialogFragment.Listener{
     public static final int REQUEST_CODE_TASK_DELETED = 100;
 
     @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
@@ -65,10 +66,18 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null){
+            supportActionBar.setDisplayShowHomeEnabled(true);
+            supportActionBar.setLogo(R.mipmap.ic_logo_itn10);
+            supportActionBar.setDisplayUseLogoEnabled(true);
+        }
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(TaskListActivity.this, TaskActivity.class));
+                startActivityForResult(new Intent(TaskListActivity.this, TaskActivity.class),
+                        REQUEST_CODE_TASK_DELETED);
             }
         });
 
@@ -116,7 +125,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
         switch (item.getItemId()){
             case R.id.action_new_task:
-                startActivity(new Intent(this, TaskActivity.class));
+                startActivityForResult(new Intent(this, TaskActivity.class), REQUEST_CODE_TASK_DELETED);
                 return true;
             case R.id.action_clear_all_tasks:
                 TaskDbManager.get(this).clearTasks();
@@ -190,9 +199,9 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             presenter.setProximityAlertsOn(gpsAlertsOn);
 
         }else if(requestCode == REQUEST_CODE_TASK_DELETED){
-            if(resultCode == RESULT_OK) {
+//            if(resultCode == RESULT_OK) {
                 presenter.refreshTasks();
-            }
+//            }
         }
     }
 
@@ -252,7 +261,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
     }
 
     private void displayPermissionsWarning(){
-        new DeviceLocationPermissionsFragment().show(getSupportFragmentManager(), "device_location_permissions");
+        new DeviceLocationPermissionsDialogFragment().show(getSupportFragmentManager(), "device_location_permissions");
     }
 
     @Override

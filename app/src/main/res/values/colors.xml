@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <!--<color name="colorPrimary">#3F51B5</color>-->
+    <color name="colorPrimary">@color/teal</color>
+    <!--<color name="colorPrimaryDark">#303F9F</color>-->
+    <color name="colorPrimaryDark">@color/tealDark</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorGrayHighlight">#888888</color>
     <color name="colorGreenHighlight">#00FF00</color>
     <color name="colorWhite">#FFFFFF</color>
 
-
     <color name="teal">#028782</color>
+    <color name="teal_transparent">#80028782</color>
+    <color name="tealDark">#026965</color>
+
+    <color name="light_gray">#F7F5F8</color>
 </resources>

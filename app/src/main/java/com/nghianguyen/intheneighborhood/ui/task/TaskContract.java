@@ -42,9 +42,11 @@ public interface TaskContract {
 
         void deleteTask();
 
-        boolean isReadyToExit();
+        boolean isSaveable();
 
         boolean isNewTask();
+
+        void saveTask();
 
         void finish();
     }
