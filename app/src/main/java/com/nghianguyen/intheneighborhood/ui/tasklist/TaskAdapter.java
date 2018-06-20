@@ -1,6 +1,5 @@
 package com.nghianguyen.intheneighborhood.ui.tasklist;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,8 +24,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.nghianguyen.intheneighborhood.ui.tasklist.TaskListActivity.REQUEST_CODE_TASK_DELETED;
-
 public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
 
     private Context context;
@@ -42,7 +39,7 @@ public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewH
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-        View taskView = inflater.inflate(R.layout.item_task2, parent, false);
+        View taskView = inflater.inflate(R.layout.item_task, parent, false);
         Log.d("onCreateViewHolder", "layout inflated");
         return new ViewHolder(taskView);
     }

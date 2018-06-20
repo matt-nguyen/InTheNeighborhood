@@ -38,7 +38,7 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
 
     @Override
     public void setDescription(String description) {
-            model.setDescription(description);
+        model.setDescription(description);
     }
 
     @Override
@@ -71,8 +71,6 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         }else{
             if(currentLocation != null){
                 locLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-
-//                toast("Current location - " + locLatLng.longitude + "," + locLatLng.latitude);
             }
         }
 
@@ -94,7 +92,6 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
             String placeName = place.getName().toString();
             LatLng latLng = place.getLatLng();
 
-//            toast("Selected location - " + latLng.longitude + "," + latLng.latitude);
             if(!view.isLocationNameEntered()){
                 view.showLocationName(placeName);
             }
@@ -152,7 +149,7 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
     }
 
     @Override
-    public boolean isReadyToExit() {
+    public boolean isSaveable() {
         String description = model.task().getDescription();
 
         return description != null && !TextUtils.isEmpty(description.trim());
@@ -163,12 +160,17 @@ public abstract class TaskPresenter implements TaskContract.Presenter{
         return model.task().getDb_id() == -1;
     }
 
-
     @Override
-    public void finish(){
+    public void saveTask() {
         if(!taskDeleted) {
             model.saveTask();
         }
+
+        finish();
+    }
+
+    @Override
+    public void finish(){
         view = null;
         mapsService = null;
     }

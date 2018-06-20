@@ -40,7 +40,7 @@ import io.fabric.sdk.android.Fabric;
 import java.util.List;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View,
-        DeviceLocationPermissionsFragment.Listener{
+        DeviceLocationPermissionsDialogFragment.Listener{
     public static final int REQUEST_CODE_TASK_DELETED = 100;
 
     @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
@@ -190,9 +190,9 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             presenter.setProximityAlertsOn(gpsAlertsOn);
 
         }else if(requestCode == REQUEST_CODE_TASK_DELETED){
-            if(resultCode == RESULT_OK) {
+//            if(resultCode == RESULT_OK) {
                 presenter.refreshTasks();
-            }
+//            }
         }
     }
 
@@ -252,7 +252,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
     }
 
     private void displayPermissionsWarning(){
-        new DeviceLocationPermissionsFragment().show(getSupportFragmentManager(), "device_location_permissions");
+        new DeviceLocationPermissionsDialogFragment().show(getSupportFragmentManager(), "device_location_permissions");
     }
 
     @Override
