@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.view.ContextMenu;
@@ -64,6 +65,13 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null){
+            supportActionBar.setDisplayShowHomeEnabled(true);
+            supportActionBar.setLogo(R.mipmap.ic_logo_itn10);
+            supportActionBar.setDisplayUseLogoEnabled(true);
+        }
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override

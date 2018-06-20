@@ -59,12 +59,6 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
         setContentView(R.layout.activity_task);
         ButterKnife.bind(this);
 
-        ActionBar supportActionBar = getSupportActionBar();
-        if(supportActionBar != null){
-            supportActionBar.setTitle("Task");
-            toggleBackButton(true);
-        }
-
         Intent intent = getIntent();
         int taskId = -1;
         if(intent != null){
@@ -72,6 +66,14 @@ public class TaskActivity extends GoogleApiConnectActivity implements OnMapReady
 
             if(taskId == -1) {
                 deleteButton.setVisibility(View.INVISIBLE);
+            }
+
+            ActionBar supportActionBar = getSupportActionBar();
+            if(supportActionBar != null){
+                supportActionBar.setTitle(
+                        (taskId == -1) ? "New Memo" : "Memo"
+                );
+                toggleBackButton(true);
             }
         }
 

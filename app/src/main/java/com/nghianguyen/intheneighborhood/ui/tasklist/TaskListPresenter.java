@@ -24,8 +24,8 @@ public class TaskListPresenter implements TaskListContract.Presenter{
 
         locationRequest = new LocationRequest()
                 .setInterval(1000)
-                .setFastestInterval(500)
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         locationCallback = new LocationCallback(){
             @Override

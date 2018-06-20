@@ -10,6 +10,7 @@
     <color name="colorWhite">#FFFFFF</color>
 
     <color name="teal">#028782</color>
+    <color name="teal_transparent">#80028782</color>
     <color name="tealDark">#026965</color>
 
     <color name="light_gray">#F7F5F8</color>

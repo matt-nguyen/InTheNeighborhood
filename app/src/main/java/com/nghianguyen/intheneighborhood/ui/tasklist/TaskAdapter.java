@@ -92,18 +92,19 @@ public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewH
         @BindView(R.id.locNameTextView) public TextView locNameTextView;
         @BindView(R.id.locAddrTextView) public TextView locAddrTextView;
         @BindView(R.id.locMapImageView) public ImageView locMapImageView;
-        @BindView(R.id.nearby_indicator) public View nearbyView;
+        @BindView(R.id.close_indicator) public View nearbyView;
+//        @BindView(R.id.nearby_indicator) public View nearbyView;
 
         private TaskListItemPresenter presenter;
 
         public ViewHolder(View v){
             super(v);
             ButterKnife.bind(this, v);
-            descriptionTextView = v.findViewById(R.id.descriptionTextView);
-            locNameTextView = v.findViewById(R.id.locNameTextView);
-            locAddrTextView = v.findViewById(R.id.locAddrTextView);
-            locMapImageView = v.findViewById(R.id.locMapImageView);
-            nearbyView = v.findViewById(R.id.nearby_indicator);
+//            descriptionTextView = v.findViewById(R.id.descriptionTextView);
+//            locNameTextView = v.findViewById(R.id.locNameTextView);
+//            locAddrTextView = v.findViewById(R.id.locAddrTextView);
+//            locMapImageView = v.findViewById(R.id.locMapImageView);
+//            nearbyView = v.findViewById(R.id.nearby_indicator);
 
             setClickEvents();
         }
