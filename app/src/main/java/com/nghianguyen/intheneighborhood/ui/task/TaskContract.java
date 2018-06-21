@@ -27,19 +27,9 @@ public interface TaskContract {
         void removePlace();
         void saveSnapshot();
         void deleteTask();
-<<<<<<< HEAD
         boolean isSaveable();
         boolean isNewTask();
         void saveTask();
-=======
-
-        boolean isSaveable();
-
-        boolean isNewTask();
-
-        void saveTask();
-
->>>>>>> master
         void finish();
     }
 }
