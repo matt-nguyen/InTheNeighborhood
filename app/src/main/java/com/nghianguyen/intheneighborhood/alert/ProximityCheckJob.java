@@ -30,7 +30,7 @@ public class ProximityCheckJob {
     private static final String LAST_LAT = "last_location_lat";
     private static final String LAST_LNG = "last_location_lng";
 
-    private static final int MIN_MOVE_DISTANCE = 1;
+    private static final int MIN_MOVE_DISTANCE = 100;
 
     private ProximityAlertManager proximityAlertManager;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -175,25 +175,6 @@ public class ProximityCheckJob {
 
         return location;
     }
-
-    private void showNotification(Context context, int taskId, String content) {
-
-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
-                .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                .setContentTitle(context.getString(R.string.notification_title))
-                .setContentText(content)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-                .build();
-
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Log.d("onReceive", "Sending notification");
-        notificationManager.notify(taskId + 20, notification);
-
-    }
-
 
     interface Callback{
         void jobFinished();

@@ -12,6 +12,8 @@ public class ProximityServiceAlarmManager {
 
     private static final int PENDING_INTENT_ID = 900000;
 
+    private static final int ALARM_INTERVAL = 60000 * 15;
+
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
 
@@ -39,15 +41,15 @@ public class ProximityServiceAlarmManager {
         }
     }
 
-    public void turnOnAlarm(){
+    private void turnOnAlarm(){
         clearAlarm();
         alarmManager.setRepeating(AlarmManager.RTC,
                 System.currentTimeMillis(),
-                60000 * 1,
+                ALARM_INTERVAL,
                 pendingIntent);
     }
 
-    public void clearAlarm(){
+    private void clearAlarm(){
         alarmManager.cancel(pendingIntent);
     }
 }

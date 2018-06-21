@@ -16,33 +16,13 @@ import com.nghianguyen.intheneighborhood.R;
 import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class RunProximityServiceReceiver extends BroadcastReceiver {
-
+    private static final int JOB_ID = 10;
     @Override
     public void onReceive(Context context, Intent intent) {
-
-//        showNotification(context, "RunProximityServiceReceiver");
-
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        jobScheduler.schedule(new JobInfo.Builder(10, new ComponentName(context, ProximityService.class))
+        jobScheduler.schedule(new JobInfo.Builder(JOB_ID, new ComponentName(context, ProximityService.class))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build());
     }
 
-    private void showNotification(Context context, String content){
-
-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
-                .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                .setContentTitle(context.getString(R.string.notification_title))
-                .setContentText(content)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-                .build();
-
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Log.d("onReceive", "Sending notification");
-        notificationManager.notify(1001, notification);
-
-    }
 }

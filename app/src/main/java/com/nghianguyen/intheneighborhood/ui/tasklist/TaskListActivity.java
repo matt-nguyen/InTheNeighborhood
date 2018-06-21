@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
@@ -42,9 +43,10 @@ import java.util.List;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View,
         DeviceLocationPermissionsDialogFragment.Listener{
-    public static final int REQUEST_CODE_TASK_DELETED = 100;
+    public static final int REQUEST_CODE_TASK = 100;
 
     @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
+    @BindView(R.id.swipe_refresh) public SwipeRefreshLayout swipeRefresh;
     @BindView(R.id.fab) public FloatingActionButton fab;
 
     private TaskAdapter mAdapter;
@@ -77,7 +79,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             @Override
             public void onClick(View view) {
                 startActivityForResult(new Intent(TaskListActivity.this, TaskActivity.class),
-                        REQUEST_CODE_TASK_DELETED);
+                        REQUEST_CODE_TASK);
             }
         });
 
@@ -125,7 +127,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
         switch (item.getItemId()){
             case R.id.action_new_task:
-                startActivityForResult(new Intent(this, TaskActivity.class), REQUEST_CODE_TASK_DELETED);
+                startActivityForResult(new Intent(this, TaskActivity.class), REQUEST_CODE_TASK);
                 return true;
             case R.id.action_clear_all_tasks:
                 TaskDbManager.get(this).clearTasks();
@@ -172,7 +174,7 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
                 Intent intent = new Intent(this, TaskActivity.class);
                 intent.putExtra(TaskActivity.EXTRA_TASK_ID, task.getDb_id());
 
-                startActivityForResult(intent, REQUEST_CODE_TASK_DELETED);
+                startActivityForResult(intent, REQUEST_CODE_TASK);
                 return true;
             case R.id.delete_task:
                 presenter.deleteTask(task);
@@ -198,10 +200,8 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
             presenter.setProximityAlertsOn(gpsAlertsOn);
 
-        }else if(requestCode == REQUEST_CODE_TASK_DELETED){
-//            if(resultCode == RESULT_OK) {
+        }else if(requestCode == REQUEST_CODE_TASK){
                 presenter.refreshTasks();
-//            }
         }
     }
 
@@ -222,13 +222,28 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
         mAdapter = new TaskAdapter(this, taskListItemPresenter){
             @Override
             void startActivityForResult(Intent intent) {
-                TaskListActivity.this.startActivityForResult(intent, REQUEST_CODE_TASK_DELETED);
+                TaskListActivity.this.startActivityForResult(intent, REQUEST_CODE_TASK);
             }
         };
 
-        taskList.setLayoutManager(new LinearLayoutManager(this));
         taskList.setAdapter(mAdapter);
+
+        setupRecyclerViewAndRefresh();
+    }
+
+    private void setupRecyclerViewAndRefresh(){
+        taskList.setLayoutManager(new LinearLayoutManager(this));
         registerForContextMenu(taskList);
+
+        swipeRefresh.setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimary,
+                R.color.colorPrimary, R.color.colorPrimaryDark);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                presenter.refreshTasks();
+                swipeRefresh.setRefreshing(false);
+            }
+        });
     }
 
     @Override

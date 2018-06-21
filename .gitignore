@@ -8,3 +8,5 @@
 /captures
 .externalNativeBuild
 google_maps_api.xml
+/keystore.properties
+/keystore.jks
