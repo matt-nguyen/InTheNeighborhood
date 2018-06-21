@@ -1,5 +1,7 @@
 package com.nghianguyen.intheneighborhood.alert;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -7,12 +9,18 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.nghianguyen.intheneighborhood.R;
 import com.nghianguyen.intheneighborhood.data.model.Task;
 
 import java.util.ArrayList;
+
+import static com.nghianguyen.intheneighborhood.InTheNeightborhoodApp.CHANNEL_NEARBY_ALERT;
 
 public class ProximityAlertManager {
 
@@ -119,7 +127,14 @@ public class ProximityAlertManager {
         intent.putExtra(ProximityAlertReceiver.EXTRA_TASK_ID, task.getDb_id());
         intent.putExtra(ProximityAlertReceiver.EXTRA_TASK_DESC, task.getDescription());
 
-        return PendingIntent.getBroadcast(context, task.getDb_id(), intent, 0);
+        String location = task.getLocName();
+        if(TextUtils.isEmpty(location)){
+            location = task.getLocAddress();
+        }
+
+        intent.putExtra(ProximityAlertReceiver.EXTRA_TASK_LOCATION, location);
+
+        return PendingIntent.getBroadcast(context, task.getDb_id(), intent, PendingIntent.FLAG_ONE_SHOT);
     }
 
     private float getProximityDistance(){

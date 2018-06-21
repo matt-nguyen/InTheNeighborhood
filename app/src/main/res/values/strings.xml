@@ -7,7 +7,11 @@
     <string name="action_clear_all_tasks">Clear All</string>
     <string name="action_settings">Settings</string>
 
+<<<<<<< HEAD
+    <string name="notification_title">You are close to %1$s!</string>
+=======
     <string name="notification_title">You are nearby!</string>
+>>>>>>> master
 
     <string name="context_menu_delete_task">Delete</string>
     <string name="context_menu_mark_done">Mark Done</string>

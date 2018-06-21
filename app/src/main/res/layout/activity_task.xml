@@ -27,6 +27,7 @@
             android:id="@+id/selectPlaceButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
             android:text="@string/button_select_place"/>
 
         <LinearLayout
@@ -61,7 +62,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:maxLines="2"
-        android:maxLength="100"
+        android:maxLength="160"
         android:inputType="textCapSentences"
         android:hint="@string/task_description_hint"
         android:background="@null"

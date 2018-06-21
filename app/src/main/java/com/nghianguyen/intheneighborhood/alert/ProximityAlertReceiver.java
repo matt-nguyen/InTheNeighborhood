@@ -23,6 +23,7 @@ public class ProximityAlertReceiver  extends BroadcastReceiver {
 
     public static final String EXTRA_TASK_ID = "com.nghianguyen.intheneighborhood.task_id";
     public static final String EXTRA_TASK_DESC = "com.nghianguyen.intheneighborhood.task_desc";
+    public static final String EXTRA_TASK_LOCATION = "com.nghianguyen.intheneighborhood.task_location";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -30,10 +31,9 @@ public class ProximityAlertReceiver  extends BroadcastReceiver {
         boolean isEntering = intent.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false);
         Log.d("onReceive", "isEntering - " + isEntering);
 
-//        showNotification(context, "testing receiver", null, false);
-
-//        if(isEntering){
-            String taskDescription = intent.getStringExtra(EXTRA_TASK_DESC);
+        if(isEntering){
+            String description = intent.getStringExtra(EXTRA_TASK_DESC);
+            String location = intent.getStringExtra(EXTRA_TASK_LOCATION);
 
             Intent taskIntent = new Intent(context, TaskActivity.class);
 
@@ -42,16 +42,18 @@ public class ProximityAlertReceiver  extends BroadcastReceiver {
 
             PendingIntent pendingIntent = PendingIntent.getActivity(context, taskId, taskIntent, 0);
 
-            showNotification(context, taskId, taskDescription, pendingIntent, isEntering);
-//        }
+            showNotification(context, taskId, description, location, pendingIntent);
+        }
     }
 
-    private void showNotification(Context context, int taskId, String content, PendingIntent pendingIntent, boolean isEntering) {
+    private void showNotification(Context context, int taskId, String content, String location,
+                                  PendingIntent pendingIntent) {
 
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
-                .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                .setContentTitle(context.getString(R.string.notification_title))
+                .setSmallIcon(R.drawable.ic_notification_itn_small)
+                .setContentTitle(context.getString(R.string.notification_title, location))
                 .setContentText(content)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(content))
                 .setContentIntent(pendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)

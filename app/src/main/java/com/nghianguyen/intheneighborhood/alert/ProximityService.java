@@ -31,29 +31,9 @@ public class ProximityService extends JobService {
 
     @Override
     public boolean onStopJob(JobParameters params) {
-        showNotification(getApplicationContext(), "onStopJob", 2);
-
         work.cleanup();
         work = null;
 
         return false;
-    }
-
-    private void showNotification(Context context, String content, int id){
-
-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_NEARBY_ALERT)
-                .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                .setContentTitle(context.getString(R.string.notification_title))
-                .setContentText(content)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true)
-                .build();
-
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Log.d("onReceive", "Sending notification");
-        notificationManager.notify(id, notification);
-
     }
 }
