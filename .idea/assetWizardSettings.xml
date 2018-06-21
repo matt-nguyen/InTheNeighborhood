@@ -45,6 +45,7 @@
                                 </PersistentState>
                               </value>
                             </entry>
+<<<<<<< HEAD
                             <entry key="notification">
                               <value>
                                 <PersistentState>
@@ -63,6 +64,8 @@
                         <option name="values">
                           <map>
                             <entry key="outputIconType" value="NOTIFICATION" />
+=======
+>>>>>>> master
                           </map>
                         </option>
                       </PersistentState>

@@ -79,21 +79,36 @@
                 <ImageView
                     android:id="@+id/locMapImageView"
                     android:layout_width="match_parent"
+<<<<<<< HEAD
                     android:layout_height="wrap_content"/>
+=======
+                    android:layout_height="wrap_content" />
+>>>>>>> master
 
                 <LinearLayout
                     android:id="@+id/close_indicator"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
+<<<<<<< HEAD
                     android:gravity="center_vertical"
                     android:background="@color/teal_transparent"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentEnd="true"
+=======
+                    android:background="@color/teal_transparent"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+
+>>>>>>> master
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:paddingTop="6dp"
                     android:paddingBottom="8dp"
+<<<<<<< HEAD
+=======
+                    android:gravity="center_vertical"
+>>>>>>> master
                     android:visibility="gone">
                     <ImageView
                         android:layout_width="18dp"

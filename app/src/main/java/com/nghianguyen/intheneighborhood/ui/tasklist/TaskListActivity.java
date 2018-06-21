@@ -13,7 +13,10 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+<<<<<<< HEAD
 import android.support.v4.widget.SwipeRefreshLayout;
+=======
+>>>>>>> master
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
@@ -43,7 +46,11 @@ import java.util.List;
 
 public class TaskListActivity extends GoogleApiConnectActivity implements TaskListContract.View,
         DeviceLocationPermissionsDialogFragment.Listener{
+<<<<<<< HEAD
     public static final int REQUEST_CODE_TASK = 100;
+=======
+    public static final int REQUEST_CODE_TASK_DELETED = 100;
+>>>>>>> master
 
     @BindView(R.id.task_recycler_view) public ContextMenuRecyclerView taskList;
     @BindView(R.id.swipe_refresh) public SwipeRefreshLayout swipeRefresh;
@@ -79,7 +86,11 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
             @Override
             public void onClick(View view) {
                 startActivityForResult(new Intent(TaskListActivity.this, TaskActivity.class),
+<<<<<<< HEAD
                         REQUEST_CODE_TASK);
+=======
+                        REQUEST_CODE_TASK_DELETED);
+>>>>>>> master
             }
         });
 
@@ -127,7 +138,11 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
         switch (item.getItemId()){
             case R.id.action_new_task:
+<<<<<<< HEAD
                 startActivityForResult(new Intent(this, TaskActivity.class), REQUEST_CODE_TASK);
+=======
+                startActivityForResult(new Intent(this, TaskActivity.class), REQUEST_CODE_TASK_DELETED);
+>>>>>>> master
                 return true;
             case R.id.action_clear_all_tasks:
                 TaskDbManager.get(this).clearTasks();
@@ -200,8 +215,15 @@ public class TaskListActivity extends GoogleApiConnectActivity implements TaskLi
 
             presenter.setProximityAlertsOn(gpsAlertsOn);
 
+<<<<<<< HEAD
         }else if(requestCode == REQUEST_CODE_TASK){
                 presenter.refreshTasks();
+=======
+        }else if(requestCode == REQUEST_CODE_TASK_DELETED){
+//            if(resultCode == RESULT_OK) {
+                presenter.refreshTasks();
+//            }
+>>>>>>> master
         }
     }
 
