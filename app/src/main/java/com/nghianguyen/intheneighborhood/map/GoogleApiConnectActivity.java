@@ -3,7 +3,7 @@ package com.nghianguyen.intheneighborhood.map;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 
 public class GoogleApiConnectActivity extends AppCompatActivity {
 
@@ -26,6 +26,6 @@ public class GoogleApiConnectActivity extends AppCompatActivity {
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase));
     }
 }
