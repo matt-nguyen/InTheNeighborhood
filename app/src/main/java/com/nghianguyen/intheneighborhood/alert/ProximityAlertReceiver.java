@@ -29,7 +29,6 @@ public class ProximityAlertReceiver  extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         boolean isEntering = intent.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false);
-        Log.d("onReceive", "isEntering - " + isEntering);
 
         if(isEntering){
             String description = intent.getStringExtra(EXTRA_TASK_DESC);
@@ -62,7 +61,6 @@ public class ProximityAlertReceiver  extends BroadcastReceiver {
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Log.d("onReceive", "Sending notification");
         notificationManager.notify(taskId + 20, notification);
 
     }

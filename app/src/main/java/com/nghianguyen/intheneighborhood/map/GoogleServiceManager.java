@@ -75,8 +75,6 @@ public class GoogleServiceManager implements GoogleApiClient.ConnectionCallbacks
     public void onConnected(@Nullable Bundle bundle) {
         if(ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED) {
-            Log.d("GoogleServiceManager", "Getting last location");
-
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         }
     }

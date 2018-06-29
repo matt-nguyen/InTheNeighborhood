@@ -46,7 +46,6 @@ public class Task {
     }
 
     public Task(JSONObject json) throws JSONException{
-        Log.d("TESTING", "Building task - " + json.toString());
         id = UUID.fromString(json.getString("ID"));
         description = json.getString("DESCRIPTION");
 
@@ -71,7 +70,7 @@ public class Task {
             jsonObject.put("LAT", locLatLng.latitude);
             jsonObject.put("LNG", locLatLng.longitude);
         }
-        Log.d("TESTING", "task to json - " + jsonObject.toString());
+
         return jsonObject;
     }
 

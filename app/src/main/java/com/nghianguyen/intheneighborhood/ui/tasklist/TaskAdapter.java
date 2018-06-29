@@ -40,7 +40,6 @@ public abstract class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewH
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         View taskView = inflater.inflate(R.layout.item_task, parent, false);
-        Log.d("onCreateViewHolder", "layout inflated");
         return new ViewHolder(taskView);
     }
 

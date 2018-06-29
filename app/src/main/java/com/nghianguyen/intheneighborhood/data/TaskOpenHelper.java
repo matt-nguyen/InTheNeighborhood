@@ -61,7 +61,6 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        Log.d("TESTING", "Upgrading from  " + i + ", to " + i1);
         sqLiteDatabase.execSQL(TASK_TABLE_DELETE);
         onCreate(sqLiteDatabase);
     }
@@ -128,11 +127,6 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
             }
         }
 
-        Log.d("TESTING", "got tasks from db");
-        for (Task task : tasks) {
-            Log.d("TESTING", task.toString());
-        }
-
         return tasks;
     }
 
@@ -192,23 +186,14 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
             }
         }
 
-        if(task != null){
-            Log.d("TESTING", "found task - " + task.toString());
-        }else{
-            Log.d("TESTING", "didn't find task");
-        }
-
         return task;
     }
 
     public long addTask(Task t){
         ContentValues cv = buildContentValues(t);
 
-        Log.d("TESTING", "inserting - " + cv.toString());
         long id = getWritableDatabase().insert(TASK_TABLE_NAME, null, cv);
-        if(id == -1){
-            Log.d("TESTING", "Error adding task to db");
-        }else{
+        if(id != -1){
             notifyUpdate();
         }
 
@@ -218,15 +203,12 @@ public class TaskOpenHelper extends SQLiteOpenHelper {
     public long updateTask(Task t){
         ContentValues cv = buildContentValues(t);
 
-        Log.d("TESTING", "updating - " + cv.toString());
         long id = getWritableDatabase().update(
                 TASK_TABLE_NAME,
                 cv,
                 "rowid = ?",
                 new String[]{String.valueOf(t.getDb_id())});
-        if(id == -1){
-            Log.d("TESTING", "Error updating task to db");
-        }else{
+        if(id != -1){
             notifyUpdate();
         }
 
